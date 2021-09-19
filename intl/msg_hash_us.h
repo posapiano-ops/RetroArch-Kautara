@@ -454,20 +454,20 @@ MSG_HASH(
    "Firmware"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_MISSING,
-   "Missing"
+   MENU_ENUM_LABEL_VALUE_MISSING_REQUIRED,
+   "Missing, Required:"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_PRESENT,
-   "Present"
+   MENU_ENUM_LABEL_VALUE_MISSING_OPTIONAL,
+   "Missing, Optional:"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_OPTIONAL,
-   "Optional"
+   MENU_ENUM_LABEL_VALUE_PRESENT_REQUIRED,
+   "Present, Required:"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_REQUIRED,
-   "Required"
+   MENU_ENUM_LABEL_VALUE_PRESENT_OPTIONAL,
+   "Present, Optional:"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_CORE_LOCK,
@@ -2362,16 +2362,14 @@ MSG_HASH(
    MENU_ENUM_LABEL_VALUE_ENABLE_DEVICE_VIBRATION,
    "Enable Device Vibration (For Supported Cores)"
    )
-#if defined(DINGUX) && defined(HAVE_LIBSHAKE)
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_INPUT_DINGUX_RUMBLE_GAIN,
-   "Vibration Strength (Restart Required)"
+   MENU_ENUM_LABEL_VALUE_INPUT_RUMBLE_GAIN,
+   "Vibration Strength"
    )
 MSG_HASH(
-   MENU_ENUM_SUBLABEL_INPUT_DINGUX_RUMBLE_GAIN,
+   MENU_ENUM_SUBLABEL_INPUT_RUMBLE_GAIN,
    "Specify the magnitude of haptic feedback effects."
    )
-#endif
 
 /* Settings > Input > Menu Controls */
 
@@ -5562,6 +5560,14 @@ MSG_HASH(
    "Validate core associations and remove invalid and duplicate entries."
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_PLAYLIST_MANAGER_REFRESH_PLAYLIST,
+   "Refresh Playlist"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_PLAYLIST_MANAGER_REFRESH_PLAYLIST,
+   "Add new content and remove invalid entries by repeating the 'Manual Scan' operation last used to create or edit the playlist."
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_DELETE_PLAYLIST,
    "Delete Playlist"
    )
@@ -6152,6 +6158,14 @@ MSG_HASH(
 MSG_HASH(
    MENU_ENUM_SUBLABEL_MANUAL_CONTENT_SCAN_OVERWRITE,
    "When enabled, any existing playlist will be deleted before scanning content. When disabled, existing playlist entries are preserved and only content currently missing from the playlist will be added."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_MANUAL_CONTENT_SCAN_VALIDATE_ENTRIES,
+   "Validate Existing Entries"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_MANUAL_CONTENT_SCAN_VALIDATE_ENTRIES,
+   "When enabled, entries in any existing playlist will be verified before scanning new content. Entries referring to missing content and/or files with invalid extensions will be removed."
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_MANUAL_CONTENT_SCAN_START,
@@ -10100,6 +10114,10 @@ MSG_HASH(
    "Port"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_PORT_DEVICE_NAME,
+   "Port %d device name: %s (#%d)"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_CHEAT_SETTINGS,
    "Cheat Settings"
    )
@@ -10896,6 +10914,30 @@ MSG_HASH(
    "Playlist cleaned: "
    )
 MSG_HASH(
+   MSG_PLAYLIST_MANAGER_REFRESH_MISSING_CONFIG,
+   "Refresh failed - playlist contains no valid scan record: "
+   )
+MSG_HASH(
+   MSG_PLAYLIST_MANAGER_REFRESH_INVALID_CONTENT_DIR,
+   "Refresh failed - invalid/missing content directory: "
+   )
+MSG_HASH(
+   MSG_PLAYLIST_MANAGER_REFRESH_INVALID_SYSTEM_NAME,
+   "Refresh failed - invalid/missing system name: "
+   )
+MSG_HASH(
+   MSG_PLAYLIST_MANAGER_REFRESH_INVALID_CORE,
+   "Refresh failed - invalid core: "
+   )
+MSG_HASH(
+   MSG_PLAYLIST_MANAGER_REFRESH_INVALID_DAT_FILE,
+   "Refresh failed - invalid/missing arcade DAT file: "
+   )
+MSG_HASH(
+   MSG_PLAYLIST_MANAGER_REFRESH_DAT_FILE_TOO_LARGE,
+   "Refresh failed - arcade DAT file too large (insufficient memory): "
+   )
+MSG_HASH(
    MSG_ADDED_TO_FAVORITES,
    "Added to favorites"
    )
@@ -11085,11 +11127,11 @@ MSG_HASH(
    )
 MSG_HASH(
    MSG_DISK_CLOSED,
-   "Closed"
+   "Closed virtual disc tray."
    )
 MSG_HASH(
    MSG_DISK_EJECTED,
-   "Ejected"
+   "Ejected virtual disc tray."
    )
 MSG_HASH(
    MSG_DOWNLOADING,
@@ -11158,10 +11200,6 @@ MSG_HASH(
 MSG_HASH(
    MSG_FAILED_SAVING_CONFIG_TO,
    "Failed saving config to"
-   )
-MSG_HASH(
-   MSG_FAILED_TO,
-   "Failed to"
    )
 MSG_HASH(
    MSG_FAILED_TO_ACCEPT_INCOMING_SPECTATOR,
@@ -11516,10 +11554,6 @@ MSG_HASH(
    "Reading first data track..."
    )
 MSG_HASH(
-   MSG_RECEIVED,
-   "received"
-   )
-MSG_HASH(
    MSG_RECORDING_TERMINATED_DUE_TO_RESIZE,
    "Recording terminated due to resize."
    )
@@ -11737,7 +11771,7 @@ MSG_HASH(
    )
 MSG_HASH(
    MSG_UNRECOGNIZED_COMMAND,
-   "Unrecognized command"
+   "Unrecognized command \"%s\" received.\n"
    )
 MSG_HASH(
    MSG_USING_CORE_NAME_FOR_NEW_CONFIG,
@@ -11772,24 +11806,20 @@ MSG_HASH(
    "Viewport size calculation failed! Will continue using raw data. This will probably not work right..."
    )
 MSG_HASH(
-   MSG_VIRTUAL_DISK_TRAY,
-   "virtual disc tray."
-   )
-MSG_HASH(
    MSG_VIRTUAL_DISK_TRAY_EJECT,
-   "eject"
+   "Failed to eject virtual disc tray."
    )
 MSG_HASH(
    MSG_VIRTUAL_DISK_TRAY_CLOSE,
-   "close"
+   "Failed to close virtual disc tray."
    )
 MSG_HASH(
-   MSG_FAILED,
-   "failed"
+   MSG_AUTOLOADING_SAVESTATE_FAILED,
+   "Auto-loading save state from \"%s\" failed."
    )
 MSG_HASH(
-   MSG_SUCCEEDED,
-   "succeeded"
+   MSG_AUTOLOADING_SAVESTATE_SUCCEEDED,
+   "Auto-loading save state from \"%s\" succeeded."
    )
 MSG_HASH(
    MSG_DEVICE_NOT_CONFIGURED,
@@ -12088,6 +12118,10 @@ MSG_HASH(
    "Scanning content: "
    )
 MSG_HASH(
+   MSG_MANUAL_CONTENT_SCAN_PLAYLIST_CLEANUP,
+   "Checking current entries: "
+   )
+MSG_HASH(
    MSG_MANUAL_CONTENT_SCAN_IN_PROGRESS,
    "Scanning: "
    )
@@ -12212,10 +12246,6 @@ MSG_HASH(
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_INPUT_SPLIT_JOYCON,
    "Split Joy-Con"
-   )
-MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_INTERNAL_STORAGE_STATUS,
-   "Internal Storage Status"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_MENU_WIDGET_SCALE_FACTOR,
@@ -12487,11 +12517,11 @@ MSG_HASH(
    )
 MSG_HASH(
    MSG_READ_WRITE,
-   "Read/Write"
+   "Internal Storage Status: Read/Write"
    )
 MSG_HASH(
    MSG_READ_ONLY,
-   "Read-Only"
+   "Internal Storage Status: Read-Only"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_BRIGHTNESS_CONTROL,

@@ -190,7 +190,7 @@ typedef struct settings
       unsigned input_menu_toggle_gamepad_combo;
       unsigned input_keyboard_gamepad_mapping_type;
       unsigned input_poll_type_behavior;
-      unsigned input_dingux_rumble_gain;
+      unsigned input_rumble_gain;
       unsigned input_auto_game_focus;
       unsigned input_max_users;
 
@@ -347,7 +347,7 @@ typedef struct settings
       float video_msg_bgcolor_opacity;
       float video_hdr_max_nits;
       float video_hdr_paper_white_nits;
-      float video_hdr_contrast;
+      float video_hdr_display_contrast;
 
       float menu_scale_factor;
       float menu_widget_scale_factor;

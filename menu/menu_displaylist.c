@@ -182,7 +182,7 @@ static void filebrowser_parse(
    const char *path                             = info->path;
    bool path_is_compressed                      = !string_is_empty(path) ?
          path_is_compressed_file(path) : false;
-   menu_serch_terms_t *search_terms             = menu_entries_search_get_terms();
+   menu_search_terms_t *search_terms            = menu_entries_search_get_terms();
 
    if (path_is_compressed)
    {
@@ -642,13 +642,15 @@ static int menu_displaylist_parse_core_info(menu_displaylist_info_t *info,
             if (!core_info->firmware[i].desc)
                continue;
 
-            snprintf(tmp, sizeof(tmp), "(!) %s, %s: %s",
+            snprintf(tmp, sizeof(tmp), "(!) %s %s",
                   core_info->firmware[i].missing ?
-                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_MISSING) :
-                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PRESENT),
-                  core_info->firmware[i].optional ?
-                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_OPTIONAL) :
-                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_REQUIRED),
+                  (core_info->firmware[i].optional ?
+                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_MISSING_OPTIONAL) :
+                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_MISSING_REQUIRED))
+                  :
+                  (core_info->firmware[i].optional ?
+                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PRESENT_OPTIONAL) :
+                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PRESENT_REQUIRED)),
                   core_info->firmware[i].desc ?
                   core_info->firmware[i].desc :
                   msg_hash_to_str(MENU_ENUM_LABEL_VALUE_RDB_ENTRY_NAME)
@@ -864,7 +866,7 @@ static unsigned menu_displaylist_parse_core_manager_list(
 
    if (core_info_list)
    {
-      menu_serch_terms_t *search_terms = menu_entries_search_get_terms();
+      menu_search_terms_t *search_terms= menu_entries_search_get_terms();
       core_info_t *core_info           = NULL;
       size_t menu_index                = 0;
       size_t i;
@@ -1352,8 +1354,7 @@ static unsigned menu_displaylist_parse_system_info(file_list_t *list)
 #ifdef ANDROID
    perms = test_permissions(internal_storage_path);
 
-   snprintf(tmp, sizeof(tmp), "%s: %s",
-         msg_hash_to_str(MENU_ENUM_LABEL_VALUE_INTERNAL_STORAGE_STATUS),
+   snprintf(tmp, sizeof(tmp), "%s",
          perms 
          ? msg_hash_to_str(MSG_READ_WRITE) 
          : msg_hash_to_str(MSG_READ_ONLY));
@@ -1440,8 +1441,8 @@ static unsigned menu_displaylist_parse_system_info(file_list_t *list)
    {
       if (input_config_get_device_autoconfigured(controller))
       {
-         snprintf(tmp, sizeof(tmp), "%s #%d device name: %s (#%d)",
-            msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT),
+         snprintf(tmp, sizeof(tmp),
+            msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT_DEVICE_NAME),
             controller,
             input_config_get_device_name(controller),
             input_config_get_device_name_index(controller));
@@ -1809,7 +1810,7 @@ static int menu_displaylist_parse_playlist(menu_displaylist_info_t *info,
    size_t           list_size        = playlist_size(playlist);
    bool show_inline_core_name        = false;
    const char *menu_driver           = menu_driver_ident();
-   menu_serch_terms_t *search_terms  = menu_entries_search_get_terms();
+   menu_search_terms_t *search_terms = menu_entries_search_get_terms();
    unsigned pl_show_inline_core_name = settings->uints.playlist_show_inline_core_name;
    bool pl_show_sublabels            = settings->bools.playlist_show_sublabels;
    void (*sanitization)(char*);
@@ -4035,6 +4036,14 @@ static bool menu_displaylist_parse_playlist_manager_settings(
             MENU_ENUM_LABEL_PLAYLIST_MANAGER_SORT_MODE,
             MENU_SETTING_PLAYLIST_MANAGER_SORT_MODE, 0, 0);
 
+   /* Refresh playlist */
+   if (playlist_scan_refresh_enabled(playlist))
+      menu_entries_append_enum(info->list,
+            msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PLAYLIST_MANAGER_REFRESH_PLAYLIST),
+            msg_hash_to_str(MENU_ENUM_LABEL_PLAYLIST_MANAGER_REFRESH_PLAYLIST),
+            MENU_ENUM_LABEL_PLAYLIST_MANAGER_REFRESH_PLAYLIST,
+            MENU_SETTING_ACTION_PLAYLIST_MANAGER_REFRESH_PLAYLIST, 0, 0);
+
    /* Clean playlist */
    menu_entries_append_enum(info->list,
          msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PLAYLIST_MANAGER_CLEAN_PLAYLIST),
@@ -4575,8 +4584,7 @@ static int menu_displaylist_parse_input_device_index_list(
                strlcpy(device_label, device_name, sizeof(device_label));
          }
          else
-            snprintf(device_label, sizeof(device_label),
-                  "%s (%s #%u)",
+            snprintf(device_label, sizeof(device_label), "%s (%s %u)",
                   msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NOT_AVAILABLE),
                   msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT),
                   map);
@@ -5240,6 +5248,13 @@ static bool menu_displaylist_parse_manual_content_scan_list(
          false) == 0)
       count++;
 
+   /* Validate existing entries */
+   if (!(*manual_content_scan_get_overwrite_playlist_ptr()) &&
+       MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(info->list,
+         MENU_ENUM_LABEL_MANUAL_CONTENT_SCAN_VALIDATE_ENTRIES, PARSE_ONLY_BOOL,
+         false) == 0)
+      count++;
+
    /* Start scan */
    if (menu_entries_append_enum(info->list,
          msg_hash_to_str(MENU_ENUM_LABEL_VALUE_MANUAL_CONTENT_SCAN_START),
@@ -5593,14 +5608,10 @@ unsigned menu_displaylist_build_list(
                         PARSE_ONLY_BOOL, false) == 0)
                   count++;
             }
-
-#if defined(DINGUX) && defined(HAVE_LIBSHAKE)
-            if (string_is_equal(joypad_driver_id, "sdl_dingux"))
-               if (MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(list,
-                        MENU_ENUM_LABEL_INPUT_DINGUX_RUMBLE_GAIN,
-                        PARSE_ONLY_UINT, false) == 0)
+            if (MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(list,
+                     MENU_ENUM_LABEL_INPUT_RUMBLE_GAIN,
+                     PARSE_ONLY_UINT, false) == 0)
                   count++;
-#endif
          }
          break;
       case DISPLAYLIST_INPUT_HOTKEY_BINDS_LIST:
@@ -6237,11 +6248,9 @@ unsigned menu_displaylist_build_list(
             for (p = 0; p < max_users; p++)
             {
                char val_s[16], val_d[16];
-               snprintf(val_s, sizeof(val_s), "%s %d %s",
-                     msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT),
-                     p+1,
-                     msg_hash_to_str(MENU_ENUM_LABEL_VALUE_CORE_INPUT_REMAPPING_OPTIONS)
-                     );
+               snprintf(val_s, sizeof(val_s),
+                     msg_hash_to_str(MENU_ENUM_LABEL_VALUE_INPUT_USER_BINDS),
+                     p+1);
                snprintf(val_d, sizeof(val_d), "%d", p);
                if (menu_entries_append_enum(list, val_s, val_d,
                         MSG_UNKNOWN,
@@ -6651,7 +6660,7 @@ unsigned menu_displaylist_build_list(
 #ifdef HAVE_CHEATS
          if (cheat_manager_alloc_if_empty())
          {
-            menu_serch_terms_t *search_terms = menu_entries_search_get_terms();
+            menu_search_terms_t *search_terms= menu_entries_search_get_terms();
             bool search_active               = search_terms && (search_terms->size > 0);
             unsigned num_cheats              = cheat_manager_get_size();
             unsigned num_cheats_shown        = 0;
@@ -9958,7 +9967,7 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
                         (const struct retro_keybind*)
                         input_config_get_bind_auto(port, retro_id);
 
-                     input_config_get_bind_string(descriptor,
+                     input_config_get_bind_string(settings, descriptor,
                            keybind, auto_bind, sizeof(descriptor));
 
                      if (!strstr(descriptor, "Auto"))
@@ -9978,7 +9987,8 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
                            && !settings->bools.menu_show_sublabels)
                      {
                         snprintf(desc_label, sizeof(desc_label),
-                              "%s [%s %u]", descriptor, msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT), port + 1);
+                               "%s [%s %u]", descriptor,
+                               msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT), port + 1);
                         strlcpy(descriptor, desc_label, sizeof(descriptor));
                      }
 
@@ -10009,7 +10019,7 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
                         (const struct retro_keybind*)
                         input_config_get_bind_auto(port, retro_id);
 
-                     input_config_get_bind_string(descriptor,
+                     input_config_get_bind_string(settings, descriptor,
                            keybind, auto_bind, sizeof(descriptor));
 
                      if (!strstr(descriptor, "Auto"))
@@ -10028,9 +10038,10 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
                            && (max_users > 1)
                            && !settings->bools.menu_show_sublabels)
                      {
-                        snprintf(desc_label, sizeof(desc_label),
-                              "%s [%s %u]", descriptor,
-                              msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT), port + 1);
+                        snprintf(desc_label, sizeof(desc_label), "%s [%s %u]",
+                              descriptor,
+                              msg_hash_to_str(MENU_ENUM_LABEL_VALUE_PORT),
+                              port + 1);
                         strlcpy(descriptor, desc_label, sizeof(descriptor));
                      }
 
@@ -10986,7 +10997,7 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
 #ifdef HAVE_NETWORKING
          {
             core_updater_list_t *core_list   = core_updater_list_get_cached();
-            menu_serch_terms_t *search_terms = menu_entries_search_get_terms();
+            menu_search_terms_t *search_terms= menu_entries_search_get_terms();
             bool show_experimental_cores     = settings->bools.network_buildbot_show_experimental_cores;
             size_t selection                 = menu_navigation_get_selection();
 

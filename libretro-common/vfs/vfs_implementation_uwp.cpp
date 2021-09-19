@@ -177,15 +177,15 @@ namespace
          }
          catch (Platform::AccessDeniedException^ e)
          {
-            Windows::UI::Popups::MessageDialog^ dialog =
-               ref new Windows::UI::Popups::MessageDialog("Path \"" + path + "\" is not currently accessible. Please open any containing directory to access it.");
+            //for some reason the path is inaccessible from within here???
+            Windows::UI::Popups::MessageDialog^ dialog = ref new Windows::UI::Popups::MessageDialog("Path is not currently accessible. Please open any containing directory to access it.");
             dialog->Commands->Append(ref new Windows::UI::Popups::UICommand("Open file picker"));
             dialog->Commands->Append(ref new Windows::UI::Popups::UICommand("Cancel"));
             return concurrency::create_task(dialog->ShowAsync()).then([path](Windows::UI::Popups::IUICommand^ cmd) {
                if (cmd->Label == "Open file picker")
                {
                   return TriggerPickerAddDialog().then([path](Platform::String^ added_path) {
-                     /* Retry */
+                     // Retry
                      return LocateStorageItem<T>(path);
                   });
                }
@@ -365,6 +365,13 @@ libretro_vfs_implementation_file *retro_vfs_file_open_impl(
 
    path_wide             = utf8_to_utf16_string_alloc(path);
    windowsize_path(path_wide);
+   std::wstring temp_path = path_wide;
+   while (true) {
+       size_t p = temp_path.find(L"\\\\");
+       if (p == std::wstring::npos) break;
+       temp_path.replace(p, 2, L"\\");
+   }
+   path_wide = _wcsdup(temp_path.c_str());
    path_str              = ref new Platform::String(path_wide);
    free(path_wide);
 
@@ -403,7 +410,7 @@ libretro_vfs_implementation_file *retro_vfs_file_open_impl(
       creationDisposition = (mode & RETRO_VFS_FILE_ACCESS_UPDATE_EXISTING) != 0 ?
           OPEN_ALWAYS : CREATE_ALWAYS;
    }
-
+   path_str = "\\\\?\\" + path_str;
    file_handle = CreateFile2FromAppW(path_str->Data(), desireAccess, FILE_SHARE_READ, creationDisposition, NULL);
 
    if (file_handle != INVALID_HANDLE_VALUE)
@@ -991,7 +998,7 @@ int uwp_move_path(std::filesystem::path old_path, std::filesystem::path new_path
             bool fail = false;
             do
             {
-                if (findDataResult.cFileName != L"." && findDataResult.cFileName != L"..")
+                if (wcscmp(findDataResult.cFileName, L".") != 0 && wcscmp(findDataResult.cFileName, L"..") != 0)
                 {
                     std::filesystem::path temp_old = old_path;
                     std::filesystem::path temp_new = new_path;
@@ -1099,88 +1106,106 @@ int retro_vfs_stat_impl(const char *path, int32_t *size)
    return 0;
 }
 
-
-
-
 #ifdef VFS_FRONTEND
 struct retro_vfs_dir_handle
 #else
 struct libretro_vfs_implementation_dir
 #endif
 {
-   IVectorView<IStorageItem^>^ directory;
-   IIterator<IStorageItem^>^ entry;
-   char *entry_name;
+    char* orig_path;
+    WIN32_FIND_DATAW entry;
+    HANDLE directory;
+    bool next;
+    char path[PATH_MAX_LENGTH];
 };
 
-libretro_vfs_implementation_dir *retro_vfs_opendir_impl(const char *name, bool include_hidden)
+libretro_vfs_implementation_dir* retro_vfs_opendir_impl(
+    const char* name, bool include_hidden)
 {
-   wchar_t *name_wide;
-   Platform::String^ name_str;
-   libretro_vfs_implementation_dir *rdir;
+    unsigned path_len;
+    char path_buf[1024];
+    size_t copied = 0;
+    wchar_t* path_wide = NULL;
+    libretro_vfs_implementation_dir* rdir;
 
-   if (!name || !*name)
-      return NULL;
+    /*Reject null or empty string paths*/
+    if (!name || (*name == 0))
+        return NULL;
 
-   rdir = (libretro_vfs_implementation_dir*)calloc(1, sizeof(*rdir));
-   if (!rdir)
-      return NULL;
+    /*Allocate RDIR struct. Tidied later with retro_closedir*/
+    rdir = (libretro_vfs_implementation_dir*)calloc(1, sizeof(*rdir));
+    if (!rdir)
+        return NULL;
 
-   name_wide = utf8_to_utf16_string_alloc(name);
-   windowsize_path(name_wide);
-   name_str  = ref new Platform::String(name_wide);
-   free(name_wide);
+    rdir->orig_path = strdup(name);
 
-   rdir->directory = RunAsyncAndCatchErrors<IVectorView<IStorageItem^>^>([&]() {
-      return concurrency::create_task(LocateStorageItem<StorageFolder>(name_str)).then([&](StorageFolder^ folder) {
-         return folder->GetItemsAsync();
-      });
-   }, nullptr);
+    path_buf[0] = '\0';
+    path_len = strlen(name);
 
-   if (rdir->directory)
-      return rdir;
+    copied = strlcpy(path_buf, name, sizeof(path_buf));
 
-   free(rdir);
-   return NULL;
+    /* Non-NT platforms don't like extra slashes in the path */
+    if (name[path_len - 1] != '\\')
+        path_buf[copied++] = '\\';
+
+    path_buf[copied] = '*';
+    path_buf[copied + 1] = '\0';
+
+    path_wide = utf8_to_utf16_string_alloc(path_buf);
+    rdir->directory = FindFirstFileExFromAppW(path_wide, FindExInfoStandard, &rdir->entry, FindExSearchNameMatch, nullptr, FIND_FIRST_EX_LARGE_FETCH);
+
+    if (path_wide)
+        free(path_wide);
+
+    if (include_hidden)
+        rdir->entry.dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN;
+    else
+        rdir->entry.dwFileAttributes &= ~FILE_ATTRIBUTE_HIDDEN;
+
+    if (rdir->directory && rdir != INVALID_HANDLE_VALUE)
+        return rdir;
+
+    retro_vfs_closedir_impl(rdir);
+    return NULL;
 }
 
-bool retro_vfs_readdir_impl(libretro_vfs_implementation_dir *rdir)
+bool retro_vfs_readdir_impl(libretro_vfs_implementation_dir* rdir)
 {
-   if (!rdir->entry)
-   {
-      rdir->entry = rdir->directory->First();
-      return rdir->entry->HasCurrent;
-   }
-   return rdir->entry->MoveNext();
+    if (rdir->next)
+        return (FindNextFileW(rdir->directory, &rdir->entry) != 0);
+
+    rdir->next = true;
+    return (rdir->directory != INVALID_HANDLE_VALUE);
 }
 
-const char *retro_vfs_dirent_get_name_impl(
-      libretro_vfs_implementation_dir *rdir)
+const char* retro_vfs_dirent_get_name_impl(libretro_vfs_implementation_dir* rdir)
 {
-   if (rdir->entry_name)
-      free(rdir->entry_name);
-   rdir->entry_name = utf16_to_utf8_string_alloc(
-         rdir->entry->Current->Name->Data());
-   return rdir->entry_name;
+    char* name = utf16_to_utf8_string_alloc(rdir->entry.cFileName);
+    memset(rdir->entry.cFileName, 0, sizeof(rdir->entry.cFileName));
+    strlcpy((char*)rdir->entry.cFileName, name, sizeof(rdir->entry.cFileName));
+    if (name)
+        free(name);
+    return (char*)rdir->entry.cFileName;
 }
 
-bool retro_vfs_dirent_is_dir_impl(libretro_vfs_implementation_dir *rdir)
+bool retro_vfs_dirent_is_dir_impl(libretro_vfs_implementation_dir* rdir)
 {
-   return rdir->entry->Current->IsOfType(StorageItemTypes::Folder);
+    const WIN32_FIND_DATA* entry = (const WIN32_FIND_DATA*)&rdir->entry;
+    return entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 }
 
-int retro_vfs_closedir_impl(libretro_vfs_implementation_dir *rdir)
+int retro_vfs_closedir_impl(libretro_vfs_implementation_dir* rdir)
 {
-   if (!rdir)
-      return -1;
+    if (!rdir)
+        return -1;
 
-   if (rdir->entry_name)
-      free(rdir->entry_name);
-   rdir->entry     = nullptr;
-   rdir->directory = nullptr;
+    if (rdir->directory != INVALID_HANDLE_VALUE)
+        FindClose(rdir->directory);
 
-   free(rdir);
-   return 0;
+    if (rdir->orig_path)
+        free(rdir->orig_path);
+    free(rdir);
+    return 0;
 }
 
 char* uwp_trigger_picker(void)
