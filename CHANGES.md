@@ -1,10 +1,30 @@
 # Future
 
+# 1.9.11
+- ANDROID: New launcher logo - will fill the corners on the homescreen
+- D3D9: Driver works again (RGUI only and software rendered cores work, no shader support yet)
+- HID/MAC: WiiU GameCube Adapter now works
+- HID/WIIU: WiiU and general HID subsystem unified/merged
+- INPUT: Refactor menu toggle combo button logic to allow quit combo button
+- INPUT/UDEV: Add mouse relative check and set appropriately to fix issue
+- LIBNX/SWITCH: Splitted Joycon button mapping
+- LIBRETRO: Add environment callback to enable cores to notify the frontend that a core otion value has changed
+- MIYOO: Add initial port
+- OPENDINGUX/RG350: Enable tinyalsa for the RG350
+- PS2: Add 'Change Resolution' option
+- PS2: Add option to change video windows offsets
+- STEAM/LINUX: Move to new 'soldier' runtime
+- WAYLAND: Remove xdg-shell-v6 protocol
+- WINDOWS: Fix non-ASCII text display in window title
+- WINDOWS 11: Shows Windows 11 version name now (Information -> System Information)
+- UWP: Further improvements to WinRT VFS layer
+
 # 1.9.10
 - 3DS: Add bottom screen idle state
 - 3DS: Add unique IDs for Gearboy/Gearcoleco/Gearsystem, correct CAP32 code
 - 3DS/SAVESTATES: Fix RAM states to file when core deinits
 - AUDIO/MIXER: Pad sample buffers to prevent potential heap-buffer-overflows when resampling (fixes crash when using 30 kHz menu audio files)
+- AUDIO/LINUX/SNAP: Add JACK support
 - CHEEVOS: Don't write achievement credentials to overrides
 - CHEEVOS: Disable slowmotion when enabling hardcore mode
 - D3D9: Fixed MVP matrix issue for RGUI texture (main game frame still won't show up though)
@@ -22,6 +42,7 @@
 - LOCALIZATION: Fetch translations from Crowdin
 - OPENDINGUX/BETA: Disable OpenAL
 - PLAYLISTS: Add 'Refresh Playlist' option
+- STEAM: Initial release on Steam
 - UWP/VFS/XBOX: Improvements and bugfixes to UWP VFS driver
 - VIDEO/REFRESH RATE: Automatic PAL/NTSC refresh rate switch where available - as long as the platform display server allows changing refresh rates and the display has the desired refresh rate
 - VIDEO FILTERS: Add 'Picoscale_256x-320x240' video filter
