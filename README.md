@@ -1,8 +1,4 @@
-[![Build Status](https://travis-ci.org/libretro/RetroArch.svg?branch=master)](https://travis-ci.org/libretro/RetroArch)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/8936/badge.svg)](https://scan.coverity.com/projects/retroarch)
-[![Crowdin](https://badges.crowdin.net/retroarch/localized.svg)](https://crowdin.com/project/retroarch)
-
-# RetroArch
+# RetroArch 1.9.11 (Nircada integration)
 
 RetroArch is the reference frontend for the libretro API.
 Popular examples of implementations for this API includes video game system emulators and game engines as well as
