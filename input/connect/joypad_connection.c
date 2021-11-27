@@ -172,46 +172,14 @@ joypad_connection_entry_t *find_connection_entry(int16_t vid, int16_t pid, const
    return NULL;
 }
 
-void pad_connection_pad_deregister(joypad_connection_t *joyconn,
-      pad_connection_interface_t *iface, void *pad_data)
-{
-   int i;
-
-#if 0
-   RARCH_LOG("pad_connection_pad_deregister\n");
-   RARCH_LOG("joyconn: 0x%08lx iface: 0x%08lx pad_data: 0x%08lx\n", (unsigned long)joyconn, (unsigned long)iface, (unsigned long)pad_data);
-#endif
-
-   for(i = 0; !joypad_is_end_of_list(&joyconn[i]); i++)
-   {
-      if(joyconn[i].connected && joyconn[i].iface == iface 
-            && iface)
-      {
-         if(iface->set_rumble)
-         {
-            iface->set_rumble(joyconn[i].connection,
-                  RETRO_RUMBLE_STRONG, 0);
-            iface->set_rumble(joyconn[i].connection,
-                  RETRO_RUMBLE_WEAK, 0);
-         }
-
-         input_autoconfigure_disconnect(i,
-               iface->get_name(joyconn[i].connection));
-
-         if(iface->multi_pad)
-         {
-            RARCH_LOG("multi-pad cleanup");
-            iface->pad_deinit(&joyconn[i].connection);
-         }
-         memset(&joyconn[i], 0, sizeof(joypad_connection_t));
-      }
-   }
-}
-
 static int joypad_to_slot(joypad_connection_t *haystack,
       joypad_connection_t *needle)
 {
    int i;
+
+   if(needle == NULL) {
+      return -1;
+   }
 
    for(i = 0; !joypad_is_end_of_list(&haystack[i]); i++)
    {
@@ -220,6 +188,48 @@ static int joypad_to_slot(joypad_connection_t *haystack,
    }
    return -1;
 }
+
+void release_joypad(joypad_connection_t *joypad) {
+
+}
+
+void legacy_pad_connection_pad_deregister(joypad_connection_t *pad_list, pad_connection_interface_t *iface, void *pad_data) {
+   int i;
+   for(i = 0; !joypad_is_end_of_list(&pad_list[i]); i++)
+   {
+      if(pad_list[i].connection == pad_data) {
+         input_autoconfigure_disconnect(i, iface ? iface->get_name(pad_data) : NULL);
+         memset(&pad_list[i], 0, sizeof(joypad_connection_t));
+         return;
+      }
+   }
+}
+
+void pad_connection_pad_deregister(joypad_connection_t *joyconn,
+      pad_connection_interface_t *iface, void *pad_data)
+{
+   int i; 
+   int slot;
+
+   if(!iface || !iface->multi_pad)
+   {
+      legacy_pad_connection_pad_deregister(joyconn, iface, pad_data);
+      return;
+   }
+
+   for(i = 0; i < iface->max_pad; i++)
+   {
+      slot = joypad_to_slot(joyconn, iface->joypad(pad_data, i));
+      if(slot >= 0)
+      {
+         input_autoconfigure_disconnect(slot, iface->get_name(joyconn[slot].connection));
+         iface->pad_deinit(joyconn[slot].connection);
+         memset(&joyconn[slot], 0, sizeof(joypad_connection_t));
+      }
+   }
+}
+
+
 
 void pad_connection_pad_refresh(joypad_connection_t *joyconn,
       pad_connection_interface_t *iface,
@@ -243,7 +253,7 @@ void pad_connection_pad_refresh(joypad_connection_t *joyconn,
          case PAD_CONNECT_BOUND:
             RARCH_LOG("PAD_CONNECT_BOUND (0x%02x)\n", state);
             joypad = iface->joypad(device_data, i);
-            slot = joypad_to_slot(joyconn, joypad);
+            slot   = joypad_to_slot(joyconn, joypad);
             input_autoconfigure_disconnect(slot,
                   iface->get_name(joypad->connection));
 
@@ -402,8 +412,11 @@ void pad_connection_packet(joypad_connection_t *joyconn, uint32_t pad,
    if (     
             joyconn->connection 
          && joyconn->iface
-         && joyconn->iface->packet_handler)
+       && joyconn->iface->packet_handler) {
+
       joyconn->iface->packet_handler(joyconn->connection, data, length);
+
+       }
 }
 
 void pad_connection_get_buttons(joypad_connection_t *joyconn,

@@ -633,9 +633,11 @@ static void win32_save_position(void)
    }
    if (window_save_positions)
    {
+      video_driver_state_t *video_st = video_state_get_ptr();
+
       if (  !video_fullscreen && 
-            !retroarch_is_forced_fullscreen() &&
-            !retroarch_is_switching_display_mode())
+            !video_st->force_fullscreen &&
+            !video_st->is_switching_display_mode)
       {
          settings->uints.window_position_x      = g_win32->pos_x;
          settings->uints.window_position_y      = g_win32->pos_y;
@@ -1615,22 +1617,32 @@ bool win32_window_create(void *data, unsigned style,
    bool    window_save_positions = settings->bools.video_window_save_positions;
    unsigned    user_width        = width;
    unsigned    user_height       = height;
-   wchar_t *title_wide     = utf8_to_utf16_string_alloc(msg_hash_to_str(MSG_PROGRAM));
+   const char *new_label         = msg_hash_to_str(MSG_PROGRAM);
+#ifdef LEGACY_WIN32
+   char *title_local             = utf8_to_local_string_alloc(new_label);
+#else
+   wchar_t *title_local          = utf8_to_utf16_string_alloc(new_label);
+#endif
 
    if (window_save_positions && !fullscreen)
    {
       user_width                 = g_win32->pos_width;
       user_height                = g_win32->pos_height;
    }
+#ifdef LEGACY_WIN32
+   main_window.hwnd              = CreateWindowEx(0,
+         "RetroArch", title_local,
+#else
    main_window.hwnd              = CreateWindowExW(0,
-         L"RetroArch", title_wide,
+         L"RetroArch", title_local,
+#endif
          style,
          fullscreen ? mon_rect->left : g_win32->pos_x,
          fullscreen ? mon_rect->top  : g_win32->pos_y,
          user_width,
          user_height,
          NULL, NULL, NULL, data);
-   free(title_wide);
+   free(title_local);
    if (!main_window.hwnd)
       return false;
 

@@ -40,6 +40,7 @@
 #include "menu_input_bind_dialog.h"
 #include "menu_entries.h"
 #include "menu_shader.h"
+#include "../gfx/gfx_animation.h"
 #include "../gfx/gfx_display.h"
 
 #include "../gfx/font_driver.h"
@@ -432,6 +433,12 @@ struct menu_state
    retro_time_t input_last_time_us;
    menu_input_t input_state;               /* retro_time_t alignment */
 
+   retro_time_t prev_start_time;
+   retro_time_t noop_press_time;
+   retro_time_t noop_start_time;
+   retro_time_t action_start_time;
+   retro_time_t action_press_time;
+
    struct menu_bind_state input_binds;     /* uint64_t alignment */
 
    menu_handle_t *driver_data;
@@ -464,6 +471,8 @@ struct menu_state
 
    /* int16_t alignment */
    menu_input_pointer_hw_state_t input_pointer_hw_state;
+
+   enum menu_action prev_action;
 
    /* When generating a menu list in menu_displaylist_build_list(),
     * the entry with a label matching 'pending_selection' will
@@ -614,10 +623,15 @@ void menu_display_handle_wallpaper_upload(retro_task_t *task,
       void *user_data, const char *err);
 
 #if defined(HAVE_LIBRETRODB)
+typedef struct explore_state explore_state_t;
+explore_state_t *menu_explore_build_list(const char *directory_playlist,
+      const char *directory_database);
 uintptr_t menu_explore_get_entry_icon(unsigned type);
 void menu_explore_context_init(void);
 void menu_explore_context_deinit(void);
+void menu_explore_free_state(explore_state_t *state);
 void menu_explore_free(void);
+void menu_explore_set_state(explore_state_t *state);
 #endif
 
 /* Returns true if search filter is enabled
@@ -755,7 +769,7 @@ void menu_input_pointer_close_messagebox(struct menu_state *menu_st);
 
 void menu_input_key_bind_poll_bind_state(
       input_driver_state_t *input_driver_st,
-      const struct retro_keybind **binds,
+      const retro_keybind_set *binds,
       float input_axis_threshold,
       unsigned joy_idx,
       struct menu_bind_state *state,
@@ -890,6 +904,37 @@ unsigned menu_event(
       input_bits_t *p_input,
       input_bits_t *p_trigger_input,
       bool display_kb);
+
+int menu_input_post_iterate(
+      gfx_display_t *p_disp,
+      struct menu_state *menu_st,
+      unsigned action,
+      retro_time_t current_time);
+
+/* Gets called when we want to toggle the menu.
+ * If the menu is already running, it will be turned off.
+ * If the menu is off, then the menu will be started.
+ */
+void menu_driver_toggle(
+      void *curr_video_data,
+      void *video_driver_data,
+      menu_handle_t *menu,
+      menu_input_t *menu_input,
+      settings_t *settings,
+      bool menu_driver_alive,
+      bool overlay_alive,
+      retro_keyboard_event_t *key_event,
+      retro_keyboard_event_t *frontend_key_event,
+      bool on);
+
+/* Iterate the menu driver for one frame. */
+bool menu_driver_iterate(
+      struct menu_state *menu_st,
+      gfx_display_t *p_disp,
+      gfx_animation_t *p_anim,
+      settings_t *settings,
+      enum menu_action action,
+      retro_time_t current_time);
 
 extern const menu_ctx_driver_t *menu_ctx_drivers[];
 

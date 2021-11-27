@@ -380,7 +380,7 @@ typedef struct xmb_handle
    /* Cached texts showing current entry index / current list size */
    char entry_index_str[32];
 
-   /* These have to be huge, because global->name.savestate
+   /* These have to be huge, because runloop_st->name.savestate
     * has a hard-coded size of 8192...
     * (the extra space here is required to silence compiler
     * warnings...) */
@@ -1179,21 +1179,18 @@ static void xmb_update_savestate_thumbnail_path(void *data, unsigned i)
              string_is_equal(entry.label, "savestate"))
          {
             char path[8204];
-            global_t *global = global_get_ptr();
+            runloop_state_t *runloop_st = runloop_state_get_ptr();
 
             path[0] = '\0';
 
-            if (global)
-            {
-               if (state_slot > 0)
-                  snprintf(path, sizeof(path), "%s%d",
-                        global->name.savestate, state_slot);
-               else if (state_slot < 0)
-                  fill_pathname_join_delim(path,
-                        global->name.savestate, "auto", '.', sizeof(path));
-               else
-                  strlcpy(path, global->name.savestate, sizeof(path));
-            }
+            if (state_slot > 0)
+               snprintf(path, sizeof(path), "%s%d",
+                     runloop_st->name.savestate, state_slot);
+            else if (state_slot < 0)
+               fill_pathname_join_delim(path,
+                     runloop_st->name.savestate, "auto", '.', sizeof(path));
+            else
+               strlcpy(path, runloop_st->name.savestate, sizeof(path));
 
             strlcat(path, FILE_PATH_PNG_EXTENSION, sizeof(path));
 
@@ -3044,7 +3041,7 @@ static uintptr_t xmb_icon_get_id(xmb_handle_t *xmb,
             if (type < (input_id + RARCH_ANALOG_BIND_LIST_END))
             {
                unsigned index = 0;
-               int input_num = type - input_id;
+               int input_num  = type - input_id;
                for (index = 0; index < ARRAY_SIZE(input_config_bind_order); index++)
                {
                   if (input_config_bind_order[index] == input_num)
@@ -6427,7 +6424,7 @@ static void xmb_context_reset_internal(xmb_handle_t *xmb,
       int char_width =
          font_driver_get_message_width(xmb->font, "a", 1, 1);
       int wideglyph_width =
-         font_driver_get_message_width(xmb->font, wideglyph_str, strlen(wideglyph_str), 1);
+         font_driver_get_message_width(xmb->font, wideglyph_str, (unsigned)strlen(wideglyph_str), 1);
 
       if (wideglyph_width > 0 && char_width > 0)
          xmb->wideglyph_width = wideglyph_width * 100 / char_width;

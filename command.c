@@ -40,11 +40,21 @@
 #include "gfx/gfx_widgets.h"
 #endif
 
+#ifdef HAVE_MENU
+#include "menu/menu_driver.h"
+#endif
+
 #ifdef HAVE_NETWORKING
 #include "network/netplay/netplay.h"
 #endif
 
+#include "audio/audio_driver.h"
+#if defined(HAVE_CG) || defined(HAVE_GLSL) || defined(HAVE_SLANG) || defined(HAVE_HLSL)
+#include "gfx/video_shader_parse.h"
+#endif
+#include "autosave.h"
 #include "command.h"
+#include "core_info.h"
 #include "cheat_manager.h"
 #include "content.h"
 #include "dynamic.h"
@@ -692,6 +702,123 @@ uint8_t *command_memory_get_pointer(
    *max_bytes = 0;
    return NULL;
 }
+
+bool command_get_status(command_t *cmd, const char* arg)
+{
+   char reply[4096]            = {0};
+   bool contentless            = false;
+   bool is_inited              = false;
+   runloop_state_t *runloop_st = runloop_state_get_ptr();
+
+   content_get_status(&contentless, &is_inited);
+
+   if (!is_inited)
+       strcpy_literal(reply, "GET_STATUS CONTENTLESS");
+   else
+   {
+       /* add some content info */
+       const char *status       = "PLAYING";
+       const char *content_name = path_basename(path_get(RARCH_PATH_BASENAME));  /* filename only without ext */
+       int content_crc32        = content_get_crc();
+       const char* system_id    = NULL;
+       core_info_t *core_info   = NULL;
+
+       core_info_get_current_core(&core_info);
+
+       if (runloop_st->paused)
+          status                = "PAUSED";
+       if (core_info)
+          system_id             = core_info->system_id;
+       if (!system_id)
+          system_id             = runloop_st->system.info.library_name;
+
+       snprintf(reply, sizeof(reply), "GET_STATUS %s %s,%s,crc32=%x\n", status, system_id, content_name, content_crc32);
+   }
+
+   cmd->replier(cmd, reply, strlen(reply));
+
+   return true;
+}
+
+bool command_read_memory(command_t *cmd, const char *arg)
+{
+   unsigned i;
+   char* reply                       = NULL;
+   char* reply_at                    = NULL;
+   const uint8_t* data               = NULL;
+   unsigned int nbytes               = 0;
+   unsigned int alloc_size           = 0;
+   unsigned int address              = -1;
+   size_t len                        = 0;
+   unsigned int max_bytes            = 0;
+   runloop_state_t *runloop_st       = runloop_state_get_ptr();
+   const rarch_system_info_t* system = &runloop_st->system;
+
+   if (sscanf(arg, "%x %u", &address, &nbytes) != 2)
+      return false;
+
+   /* Ensure large enough to return all requested bytes or an error message */
+   alloc_size = 64 + nbytes * 3;
+   reply      = (char*)malloc(alloc_size);
+   reply_at   = reply + snprintf(reply, alloc_size - 1, "READ_CORE_MEMORY %x", address);
+
+   data       = command_memory_get_pointer(system, address, &max_bytes, 0, reply_at, alloc_size - strlen(reply));
+
+   if (data)
+   {
+      if (nbytes > max_bytes)
+          nbytes = max_bytes;
+
+      for (i = 0; i < nbytes; i++)
+         snprintf(reply_at + 3 * i, 4, " %02X", data[i]);
+
+      reply_at[3 * nbytes] = '\n';
+      len                  = reply_at + 3 * nbytes + 1 - reply;
+   }
+   else
+      len                  = strlen(reply);
+
+   cmd->replier(cmd, reply, len);
+   free(reply);
+   return true;
+}
+
+bool command_write_memory(command_t *cmd, const char *arg)
+{
+   unsigned int address         = (unsigned int)strtoul(arg, (char**)&arg, 16);
+   unsigned int max_bytes       = 0;
+   char reply[128]              = "";
+   runloop_state_t *runloop_st  = runloop_state_get_ptr();
+   const rarch_system_info_t
+      *system                   = &runloop_st->system;
+   char *reply_at               = reply + snprintf(reply, sizeof(reply) - 1, "WRITE_CORE_MEMORY %x", address);
+   uint8_t *data                = command_memory_get_pointer(system, address, &max_bytes, 1, reply_at, sizeof(reply) - strlen(reply) - 1);
+
+   if (data)
+   {
+      uint8_t* start = data;
+      while (*arg && max_bytes > 0)
+      {
+         --max_bytes;
+         *data = strtoul(arg, (char**)&arg, 16);
+         data++;
+      }
+
+      snprintf(reply_at, sizeof(reply) - strlen(reply) - 1,
+            " %u\n", (unsigned)(data - start));
+
+#ifdef HAVE_CHEEVOS
+      if (rcheevos_hardcore_active())
+      {
+         RARCH_LOG("Achievements hardcore mode disabled by WRITE_CORE_MEMORY\n");
+         rcheevos_pause_hardcore();
+      }
+#endif
+   }
+
+   cmd->replier(cmd, reply, strlen(reply));
+   return true;
+}
 #endif
 
 void command_event_set_volume(
@@ -910,13 +1037,13 @@ bool command_event_resize_windowed_scale(settings_t *settings,
 
 bool command_event_save_auto_state(
       bool savestate_auto_save,
-      global_t *global,
       const enum rarch_core_type current_core_type)
 {
+   runloop_state_t *runloop_st = runloop_state_get_ptr();
    bool ret                    = false;
    char savestate_name_auto[PATH_MAX_LENGTH];
 
-   if (!global || !savestate_auto_save)
+   if (!savestate_auto_save)
       return false;
    if (current_core_type == CORE_TYPE_DUMMY)
       return false;
@@ -931,7 +1058,8 @@ bool command_event_save_auto_state(
 
    savestate_name_auto[0]      = '\0';
 
-   fill_pathname_noext(savestate_name_auto, global->name.savestate,
+   fill_pathname_noext(savestate_name_auto,
+         runloop_st->name.savestate,
          ".auto", sizeof(savestate_name_auto));
 
    ret = content_save_state((const char*)savestate_name_auto, true, true);
@@ -972,9 +1100,10 @@ void command_event_init_cheats(
 }
 #endif
 
-void command_event_load_auto_state(global_t *global)
+void command_event_load_auto_state(void)
 {
    char savestate_name_auto[PATH_MAX_LENGTH];
+   runloop_state_t *runloop_st     = runloop_state_get_ptr();
    bool ret                        = false;
 #ifdef HAVE_CHEEVOS
    if (rcheevos_hardcore_active())
@@ -987,7 +1116,7 @@ void command_event_load_auto_state(global_t *global)
 
    savestate_name_auto[0] = '\0';
 
-   fill_pathname_noext(savestate_name_auto, global->name.savestate,
+   fill_pathname_noext(savestate_name_auto, runloop_st->name.savestate,
          ".auto", sizeof(savestate_name_auto));
 
    if (!path_is_valid(savestate_name_auto))
@@ -1003,9 +1132,7 @@ void command_event_load_auto_state(global_t *global)
          );
 }
 
-void command_event_set_savestate_auto_index(
-      settings_t *settings,
-      const global_t *global)
+void command_event_set_savestate_auto_index(settings_t *settings)
 {
    size_t i;
    char state_dir[PATH_MAX_LENGTH];
@@ -1013,21 +1140,22 @@ void command_event_set_savestate_auto_index(
 
    struct string_list *dir_list      = NULL;
    unsigned max_idx                  = 0;
+   runloop_state_t *runloop_st       = runloop_state_get_ptr();
    bool savestate_auto_index         = settings->bools.savestate_auto_index;
    bool show_hidden_files            = settings->bools.show_hidden_files;
 
-   if (!global || !savestate_auto_index)
+   if (!savestate_auto_index)
       return;
 
    state_dir[0] = state_base[0]      = '\0';
 
-   /* Find the file in the same directory as global->savestate_name
+   /* Find the file in the same directory as runloop_st->savestate_name
     * with the largest numeral suffix.
     *
     * E.g. /foo/path/content.state, will try to find
     * /foo/path/content.state%d, where %d is the largest number available.
     */
-   fill_pathname_basedir(state_dir, global->name.savestate,
+   fill_pathname_basedir(state_dir, runloop_st->name.savestate,
          sizeof(state_dir));
 
    dir_list = dir_list_new_special(state_dir, DIR_LIST_PLAIN, NULL,
@@ -1036,7 +1164,7 @@ void command_event_set_savestate_auto_index(
    if (!dir_list)
       return;
 
-   fill_pathname_base(state_base, global->name.savestate,
+   fill_pathname_base(state_base, runloop_st->name.savestate,
          sizeof(state_base));
 
    for (i = 0; i < dir_list->size; i++)
@@ -1070,7 +1198,6 @@ void command_event_set_savestate_auto_index(
 }
 
 void command_event_set_savestate_garbage_collect(
-      const global_t *global,
       unsigned max_to_keep,
       bool show_hidden_files
       )
@@ -1078,6 +1205,7 @@ void command_event_set_savestate_garbage_collect(
    size_t i, cnt = 0;
    char state_dir[PATH_MAX_LENGTH];
    char state_base[PATH_MAX_LENGTH];
+   runloop_state_t *runloop_st       = runloop_state_get_ptr();
 
    struct string_list *dir_list      = NULL;
    unsigned min_idx                  = UINT_MAX;
@@ -1088,7 +1216,7 @@ void command_event_set_savestate_garbage_collect(
 
    /* Similar to command_event_set_savestate_auto_index(),
     * this will find the lowest numbered save-state */
-   fill_pathname_basedir(state_dir, global->name.savestate,
+   fill_pathname_basedir(state_dir, runloop_st->name.savestate,
          sizeof(state_dir));
 
    dir_list = dir_list_new_special(state_dir, DIR_LIST_PLAIN, NULL,
@@ -1097,7 +1225,7 @@ void command_event_set_savestate_garbage_collect(
    if (!dir_list)
       return;
 
-   fill_pathname_base(state_base, global->name.savestate,
+   fill_pathname_base(state_base, runloop_st->name.savestate,
          sizeof(state_base));
 
    for (i = 0; i < dir_list->size; i++)
@@ -1153,4 +1281,370 @@ void command_event_set_savestate_garbage_collect(
       filestream_delete(oldest_save);
 
    dir_list_free(dir_list);
+}
+
+#if defined(HAVE_CG) || defined(HAVE_GLSL) || defined(HAVE_SLANG) || defined(HAVE_HLSL)
+bool command_set_shader(command_t *cmd, const char *arg)
+{
+   enum  rarch_shader_type type = video_shader_parse_type(arg);
+   settings_t  *settings        = config_get_ptr();
+
+   if (!string_is_empty(arg))
+   {
+      if (!video_shader_is_supported(type))
+         return false;
+
+      /* rebase on shader directory */
+      if (!path_is_absolute(arg))
+      {
+         static char abs_arg[PATH_MAX_LENGTH];
+         const char *ref_path = settings->paths.directory_video_shader;
+         fill_pathname_join(abs_arg,
+               ref_path, arg, sizeof(abs_arg));
+         /* TODO/FIXME - pointer to local variable -
+          * making abs_arg static for now to workaround this
+          */
+         arg = abs_arg;
+      }
+   }
+
+   return apply_shader(settings, type, arg, true);
+}
+#endif
+
+#ifdef HAVE_CONFIGFILE
+bool command_event_save_core_config(
+      const char *dir_menu_config,
+      const char *rarch_path_config)
+{
+   char msg[128];
+   char config_name[PATH_MAX_LENGTH];
+   char config_path[PATH_MAX_LENGTH];
+   char config_dir[PATH_MAX_LENGTH];
+   bool found_path                 = false;
+   bool overrides_active           = false;
+   const char *core_path           = NULL;
+   runloop_state_t *runloop_st     = runloop_state_get_ptr();
+
+   msg[0]                          = '\0';
+   config_dir[0]                   = '\0';
+
+   if (!string_is_empty(dir_menu_config))
+      strlcpy(config_dir, dir_menu_config, sizeof(config_dir));
+   else if (!string_is_empty(rarch_path_config)) /* Fallback */
+      fill_pathname_basedir(config_dir, rarch_path_config,
+            sizeof(config_dir));
+
+   if (string_is_empty(config_dir))
+   {
+      runloop_msg_queue_push(msg_hash_to_str(MSG_CONFIG_DIRECTORY_NOT_SET), 1, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+      RARCH_ERR("[Config]: %s\n", msg_hash_to_str(MSG_CONFIG_DIRECTORY_NOT_SET));
+      return false;
+   }
+
+   core_path                       = path_get(RARCH_PATH_CORE);
+   config_name[0]                  = '\0';
+   config_path[0]                  = '\0';
+
+   /* Infer file name based on libretro core. */
+   if (path_is_valid(core_path))
+   {
+      unsigned i;
+      RARCH_LOG("%s\n", msg_hash_to_str(MSG_USING_CORE_NAME_FOR_NEW_CONFIG));
+
+      /* In case of collision, find an alternative name. */
+      for (i = 0; i < 16; i++)
+      {
+         char tmp[64];
+
+         fill_pathname_base_noext(
+               config_name,
+               core_path,
+               sizeof(config_name));
+
+         fill_pathname_join(config_path, config_dir, config_name,
+               sizeof(config_path));
+
+         if (i)
+            snprintf(tmp, sizeof(tmp), "-%u.cfg", i);
+         else
+         {
+            tmp[0] = '\0';
+            strlcpy(tmp, ".cfg", sizeof(tmp));
+         }
+
+         strlcat(config_path, tmp, sizeof(config_path));
+
+         if (!path_is_valid(config_path))
+         {
+            found_path = true;
+            break;
+         }
+      }
+   }
+
+   if (!found_path)
+   {
+      /* Fallback to system time... */
+      RARCH_WARN("[Config]: %s\n",
+            msg_hash_to_str(MSG_CANNOT_INFER_NEW_CONFIG_PATH));
+      fill_dated_filename(config_name, ".cfg", sizeof(config_name));
+      fill_pathname_join(config_path, config_dir, config_name,
+            sizeof(config_path));
+   }
+
+   if (runloop_st->overrides_active)
+   {
+      /* Overrides block config file saving,
+       * make it appear as overrides weren't enabled
+       * for a manual save. */
+      runloop_st->overrides_active      = false;
+      overrides_active                  = true;
+   }
+
+#ifdef HAVE_CONFIGFILE
+   command_event_save_config(config_path, msg, sizeof(msg));
+#endif
+
+   if (!string_is_empty(msg))
+      runloop_msg_queue_push(msg, 1, 180, true, NULL,
+            MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+
+   runloop_st->overrides_active = overrides_active;
+
+   return true;
+}
+
+void command_event_save_current_config(enum override_type type)
+{
+   runloop_state_t *runloop_st     = runloop_state_get_ptr();
+
+   switch (type)
+   {
+      case OVERRIDE_NONE:
+         {
+            if (path_is_empty(RARCH_PATH_CONFIG))
+            {
+               char msg[128];
+               msg[0] = '\0';
+               strcpy_literal(msg, "[Config]: Config directory not set, cannot save configuration.");
+               runloop_msg_queue_push(msg, 1, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+            }
+            else
+            {
+               char msg[256];
+               msg[0] = '\0';
+               command_event_save_config(path_get(RARCH_PATH_CONFIG), msg, sizeof(msg));
+               runloop_msg_queue_push(msg, 1, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+            }
+         }
+         break;
+      case OVERRIDE_GAME:
+      case OVERRIDE_CORE:
+      case OVERRIDE_CONTENT_DIR:
+         {
+            char msg[128];
+            msg[0] = '\0';
+            if (config_save_overrides(type, &runloop_st->system))
+            {
+               strlcpy(msg, msg_hash_to_str(MSG_OVERRIDES_SAVED_SUCCESSFULLY), sizeof(msg));
+               /* set overrides to active so the original config can be
+                  restored after closing content */
+               runloop_st->overrides_active = true;
+            }
+            else
+               strlcpy(msg, msg_hash_to_str(MSG_OVERRIDES_ERROR_SAVING), sizeof(msg));
+            RARCH_LOG("[Config - Overrides]: %s\n", msg);
+            runloop_msg_queue_push(msg, 1, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+         }
+         break;
+   }
+}
+#endif
+
+bool command_event_main_state(unsigned cmd)
+{
+   retro_ctx_size_info_t info;
+   char msg[128];
+   char state_path[16384];
+   settings_t *settings        = config_get_ptr();
+   bool ret                    = false;
+   bool push_msg               = true;
+
+   state_path[0] = msg[0]      = '\0';
+
+   retroarch_get_current_savestate_path(state_path, sizeof(state_path));
+
+   core_serialize_size(&info);
+
+   if (info.size)
+   {
+      switch (cmd)
+      {
+         case CMD_EVENT_SAVE_STATE:
+         case CMD_EVENT_SAVE_STATE_TO_RAM:
+            {
+               video_driver_state_t *video_st                 = 
+                  video_state_get_ptr();
+               bool savestate_auto_index                      =
+                     settings->bools.savestate_auto_index;
+               unsigned savestate_max_keep                    =
+                     settings->uints.savestate_max_keep;
+               bool frame_time_counter_reset_after_save_state =
+                     settings->bools.frame_time_counter_reset_after_save_state;
+
+               if (cmd == CMD_EVENT_SAVE_STATE)
+                  content_save_state(state_path, true, false);
+               else
+                  content_save_state_to_ram();
+
+               /* Clean up excess savestates if necessary */
+               if (savestate_auto_index && (savestate_max_keep > 0))
+                  command_event_set_savestate_garbage_collect(
+                        settings->uints.savestate_max_keep,
+                        settings->bools.show_hidden_files
+                        );
+
+               if (frame_time_counter_reset_after_save_state)
+                  video_st->frame_time_count = 0;
+
+               ret      = true;
+               push_msg = false;
+            }
+            break;
+         case CMD_EVENT_LOAD_STATE:
+         case CMD_EVENT_LOAD_STATE_FROM_RAM:
+            {
+               bool res = false;
+               if (cmd == CMD_EVENT_LOAD_STATE)
+                  res = content_load_state(state_path, false, false);
+               else
+                  res = content_load_state_from_ram();
+
+               if (res)
+               {
+#ifdef HAVE_CHEEVOS
+                  if (rcheevos_hardcore_active())
+                  {
+                     rcheevos_pause_hardcore();
+                     runloop_msg_queue_push(msg_hash_to_str(MSG_CHEEVOS_HARDCORE_MODE_DISABLED), 0, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+                  }
+#endif
+                  ret = true;
+#ifdef HAVE_NETWORKING
+                  netplay_driver_ctl(RARCH_NETPLAY_CTL_LOAD_SAVESTATE, NULL);
+#endif
+                  {
+                     video_driver_state_t *video_st                 = 
+                        video_state_get_ptr();
+                     bool frame_time_counter_reset_after_load_state =
+                        settings->bools.frame_time_counter_reset_after_load_state;
+                     if (frame_time_counter_reset_after_load_state)
+                        video_st->frame_time_count = 0;
+                  }
+               }
+            }
+            push_msg = false;
+            break;
+         case CMD_EVENT_UNDO_LOAD_STATE:
+            command_event_undo_load_state(msg, sizeof(msg));
+            ret = true;
+            break;
+         case CMD_EVENT_UNDO_SAVE_STATE:
+            command_event_undo_save_state(msg, sizeof(msg));
+            ret = true;
+            break;
+      }
+   }
+   else
+      strlcpy(msg, msg_hash_to_str(
+               MSG_CORE_DOES_NOT_SUPPORT_SAVESTATES), sizeof(msg));
+
+   if (push_msg)
+      runloop_msg_queue_push(msg, 2, 180, true, NULL,
+            MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
+
+   if (!string_is_empty(msg))
+      RARCH_LOG("%s\n", msg);
+
+   return ret;
+}
+
+bool command_event_disk_control_append_image(
+      const char *path)
+{
+   runloop_state_t *runloop_st    = runloop_state_get_ptr();
+   rarch_system_info_t *sys_info  = runloop_st ? (rarch_system_info_t*)&runloop_st->system : NULL;
+   if (  !sys_info ||
+         !disk_control_append_image(&sys_info->disk_control, path))
+      return false;
+
+#ifdef HAVE_THREADS
+   if (runloop_st->use_sram)
+      autosave_deinit();
+#endif
+
+   /* TODO/FIXME: Need to figure out what to do with subsystems case. */
+   if (path_is_empty(RARCH_PATH_SUBSYSTEM))
+   {
+      /* Update paths for our new image.
+       * If we actually use append_image, we assume that we
+       * started out in a single disk case, and that this way
+       * of doing it makes the most sense. */
+      path_set(RARCH_PATH_NAMES, path);
+      runloop_path_fill_names();
+   }
+
+   command_event(CMD_EVENT_AUTOSAVE_INIT, NULL);
+
+   return true;
+}
+
+void command_event_reinit(const int flags)
+{
+   settings_t *settings           = config_get_ptr();
+   input_driver_state_t *input_st = input_state_get_ptr();
+   video_driver_state_t *video_st = video_state_get_ptr();
+#ifdef HAVE_MENU
+   gfx_display_t *p_disp          = disp_get_ptr();
+   struct menu_state *menu_st     = menu_state_get_ptr();
+   bool video_fullscreen          = settings->bools.video_fullscreen;
+   bool adaptive_vsync            = settings->bools.video_adaptive_vsync;
+   unsigned swap_interval         = settings->uints.video_swap_interval;
+#endif
+   enum input_game_focus_cmd_type 
+      game_focus_cmd              = GAME_FOCUS_CMD_REAPPLY;
+   const input_device_driver_t 
+      *joypad                     = input_st->primary_joypad;
+#ifdef HAVE_MFI
+   const input_device_driver_t 
+      *sec_joypad                 = input_st->secondary_joypad;
+#else
+   const input_device_driver_t 
+      *sec_joypad                 = NULL;
+#endif
+
+   video_driver_reinit(flags);
+   /* Poll input to avoid possibly stale data to corrupt things. */
+   if (  joypad && joypad->poll)
+      joypad->poll();
+   if (  sec_joypad && sec_joypad->poll)
+      sec_joypad->poll();
+   if (  input_st->current_driver &&
+         input_st->current_driver->poll)
+      input_st->current_driver->poll(input_st->current_data);
+   command_event(CMD_EVENT_GAME_FOCUS_TOGGLE, &game_focus_cmd);
+
+#ifdef HAVE_MENU
+   p_disp->framebuf_dirty = true;
+   if (video_fullscreen)
+      video_driver_hide_mouse();
+   if (     menu_st->alive 
+         && video_st->current_video->set_nonblock_state)
+      video_st->current_video->set_nonblock_state(
+            video_st->data, false,
+            video_driver_test_all_flags(GFX_CTX_FLAGS_ADAPTIVE_VSYNC) &&
+            adaptive_vsync,
+            swap_interval);
+#endif
 }

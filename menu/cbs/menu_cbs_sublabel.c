@@ -29,6 +29,7 @@
 #ifdef HAVE_CHEEVOS
 #include "../../cheevos/cheevos_menu.h"
 #endif
+#include "../../audio/audio_driver.h"
 #include "../../core_info.h"
 #include "../../verbosity.h"
 #include "../../bluetooth/bluetooth_driver.h"
@@ -36,7 +37,6 @@
 
 #ifdef HAVE_NETWORKING
 #include "../../network/netplay/netplay.h"
-#include "../../network/netplay/netplay_discovery.h"
 #endif
 
 #include "../../retroarch.h"
@@ -312,6 +312,7 @@ DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_materialui_thumbnail_background_enab
 #endif
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_add_content_list,              MENU_ENUM_SUBLABEL_ADD_CONTENT_LIST)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_frame_delay,             MENU_ENUM_SUBLABEL_VIDEO_FRAME_DELAY)
+DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_frame_delay_auto,        MENU_ENUM_SUBLABEL_VIDEO_FRAME_DELAY_AUTO)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_shader_delay,            MENU_ENUM_SUBLABEL_VIDEO_SHADER_DELAY)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_black_frame_insertion,   MENU_ENUM_SUBLABEL_VIDEO_BLACK_FRAME_INSERTION)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_systeminfo_cpu_cores,          MENU_ENUM_SUBLABEL_CPU_CORES)
@@ -440,6 +441,9 @@ DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_notification_show_screenshot_duratio
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_notification_show_screenshot_flash, MENU_ENUM_SUBLABEL_NOTIFICATION_SHOW_SCREENSHOT_FLASH)
 #endif
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_notification_show_refresh_rate, MENU_ENUM_SUBLABEL_NOTIFICATION_SHOW_REFRESH_RATE)
+#ifdef HAVE_NETWORKING
+DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_notification_show_netplay_extra, MENU_ENUM_SUBLABEL_NOTIFICATION_SHOW_NETPLAY_EXTRA)
+#endif
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_window_width,            MENU_ENUM_SUBLABEL_VIDEO_WINDOW_WIDTH)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_window_height,           MENU_ENUM_SUBLABEL_VIDEO_WINDOW_HEIGHT)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_video_window_auto_width_max,   MENU_ENUM_SUBLABEL_VIDEO_WINDOW_AUTO_WIDTH_MAX)
@@ -1093,17 +1097,18 @@ static int action_bind_sublabel_subsystem_add(
       const char *label, const char *path,
       char *s, size_t len)
 {
-   const struct retro_subsystem_info *subsystem;
-   rarch_system_info_t *system                  = &runloop_state_get_ptr()->system;
+   const struct retro_subsystem_info *subsystem = NULL;
+   runloop_state_t *runloop_st                  = runloop_state_get_ptr();
+   rarch_system_info_t *system                  = &runloop_st->system;
 
    /* Core fully loaded, use the subsystem data */
    if (system->subsystem.data)
       subsystem = system->subsystem.data + (type - MENU_SETTINGS_SUBSYSTEM_ADD);
    /* Core not loaded completely, use the data we peeked on load core */
    else
-      subsystem = subsystem_data + (type - MENU_SETTINGS_SUBSYSTEM_ADD);
+      subsystem = runloop_st->subsystem_data + (type - MENU_SETTINGS_SUBSYSTEM_ADD);
 
-   if (subsystem && subsystem_current_count > 0)
+   if (subsystem && runloop_st->subsystem_current_count > 0)
    {
       if (content_get_subsystem_rom_id() < subsystem->num_roms)
          snprintf(s, len, " Current Content: %s",
@@ -1317,26 +1322,27 @@ static int action_bind_sublabel_netplay_room(
       const char *label, const char *path,
       char *s, size_t len)
 {
-   uint32_t gamecrc       = 0;
-   const char *ra_version = NULL;
-   const char *corename   = NULL;
-   const char *gamename   = NULL;
-   const char *core_ver   = NULL;
-   const char *frontend   = NULL;
-   const char *na         = NULL;
-   const char *subsystem  = NULL;
-   unsigned room_index    = type - MENU_SETTINGS_NETPLAY_ROOMS_START;
+   uint32_t gamecrc           = 0;
+   const char *ra_version     = NULL;
+   const char *corename       = NULL;
+   const char *gamename       = NULL;
+   const char *core_ver       = NULL;
+   const char *frontend       = NULL;
+   const char *na             = NULL;
+   const char *subsystem      = NULL;
+   net_driver_state_t *net_st = networking_state_get_ptr();
+   unsigned room_index        = type - MENU_SETTINGS_NETPLAY_ROOMS_START;
 
-   if (room_index >= (unsigned)netplay_room_count)
+   if (room_index >= (unsigned)net_st->room_count)
       return menu_cbs_exit();
 
-   ra_version = netplay_room_list[room_index].retroarch_version;
-   corename   = netplay_room_list[room_index].corename;
-   gamename   = netplay_room_list[room_index].gamename;
-   core_ver   = netplay_room_list[room_index].coreversion;
-   gamecrc    = netplay_room_list[room_index].gamecrc;
-   frontend   = netplay_room_list[room_index].frontend;
-   subsystem  = netplay_room_list[room_index].subsystem_name;
+   ra_version = net_st->room_list[room_index].retroarch_version;
+   corename   = net_st->room_list[room_index].corename;
+   gamename   = net_st->room_list[room_index].gamename;
+   core_ver   = net_st->room_list[room_index].coreversion;
+   gamecrc    = net_st->room_list[room_index].gamecrc;
+   frontend   = net_st->room_list[room_index].frontend;
+   subsystem  = net_st->room_list[room_index].subsystem_name;
    na         = msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NOT_AVAILABLE);
 
    if (string_is_empty(subsystem) || string_is_equal(subsystem,
@@ -3475,6 +3481,11 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
          case MENU_ENUM_LABEL_NOTIFICATION_SHOW_REFRESH_RATE:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_notification_show_refresh_rate);
             break;
+#ifdef HAVE_NETWORKING
+         case MENU_ENUM_LABEL_NOTIFICATION_SHOW_NETPLAY_EXTRA:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_notification_show_netplay_extra);
+            break;
+#endif
          case MENU_ENUM_LABEL_RESTART_RETROARCH:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_restart_retroarch);
             break;
@@ -3811,6 +3822,9 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
             break;
          case MENU_ENUM_LABEL_VIDEO_FRAME_DELAY:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_video_frame_delay);
+            break;
+         case MENU_ENUM_LABEL_VIDEO_FRAME_DELAY_AUTO:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_video_frame_delay_auto);
             break;
          case MENU_ENUM_LABEL_VIDEO_SHADER_DELAY:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_video_shader_delay);

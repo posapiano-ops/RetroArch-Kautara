@@ -193,7 +193,6 @@ ACHIEVEMENTS
 #include "../cheevos/cheevos.c"
 #include "../cheevos/cheevos_client.c"
 #include "../cheevos/cheevos_menu.c"
-#include "../cheevos/cheevos_parser.c"
 
 #include "../deps/rcheevos/src/rapi/rc_api_common.c"
 #include "../deps/rcheevos/src/rapi/rc_api_runtime.c"
@@ -214,7 +213,6 @@ ACHIEVEMENTS
 #include "../deps/rcheevos/src/rcheevos/trigger.c"
 #include "../deps/rcheevos/src/rcheevos/value.c"
 #include "../deps/rcheevos/src/rhash/hash.c"
-#include "../deps/rcheevos/src/rurl/url.c"
 
 #endif
 
@@ -866,6 +864,7 @@ AUDIO RESAMPLER
 /*============================================================
 CAMERA
 ============================================================ */
+#include "../camera/camera_driver.c"
 #if defined(ANDROID)
 #include "../camera/drivers/android.c"
 #elif defined(EMSCRIPTEN)
@@ -912,6 +911,7 @@ RSOUND
 /*============================================================
 AUDIO
 ============================================================ */
+#include "../audio/audio_driver.c"
 #if defined(__PS3__) || defined (__PSL1GHT__)
 #include "../audio/drivers/ps3_audio.c"
 #elif defined(XENON)
@@ -1272,6 +1272,7 @@ WIFI
 /*============================================================
 RECORDING
 ============================================================ */
+#include "../record/record_driver.c"
 #ifdef HAVE_FFMPEG
 #include "../record/drivers/record_ffmpeg.c"
 #endif
@@ -1397,6 +1398,7 @@ MENU
 #include "../menu/menu_displaylist.c"
 #ifdef HAVE_LIBRETRODB
 #include "../menu/menu_explore.c"
+#include "../tasks/task_menu_explore.c"
 #endif
 #endif
 
@@ -1575,6 +1577,7 @@ XML
 HTTP SERVER
 ============================================================ */
 #if defined(HAVE_DISCORD)
+#include "../network/discord.c"
 #if defined(_WIN32)
 #include "../deps/discord-rpc/src/discord_register_win.c"
 #endif

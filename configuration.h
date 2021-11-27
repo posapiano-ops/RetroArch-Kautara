@@ -200,6 +200,7 @@ typedef struct settings
       unsigned input_max_users;
 
       unsigned netplay_port;
+      unsigned netplay_max_connections;
       unsigned netplay_input_latency_frames_min;
       unsigned netplay_input_latency_frames_range;
       unsigned netplay_share_digital;
@@ -533,6 +534,7 @@ typedef struct settings
       bool video_smooth;
       bool video_ctx_scaling;
       bool video_force_aspect;
+      bool video_frame_delay_auto;
       bool video_crop_overscan;
       bool video_aspect_ratio_auto;
       bool video_dingux_ipu_keep_aspect;
@@ -593,6 +595,7 @@ typedef struct settings
       bool input_overlay_auto_scale;
       bool input_descriptor_label_show;
       bool input_descriptor_hide_unbound;
+      bool input_all_users_control_menu;
       bool input_menu_swap_ok_cancel_buttons;
       bool input_backtouch_enable;
       bool input_backtouch_toggle;
@@ -623,6 +626,7 @@ typedef struct settings
       bool notification_show_screenshot;
 #endif
       bool notification_show_refresh_rate;
+      bool notification_show_netplay_extra;
       bool menu_widget_scale_auto;
       bool menu_show_start_screen;
       bool menu_pause_libretro;
@@ -1078,6 +1082,10 @@ void config_load(void *data);
 void config_load_file_salamander(void);
 void config_save_file_salamander(void);
 #endif
+
+void rarch_config_init(void);
+
+void rarch_config_deinit(void);
 
 settings_t *config_get_ptr(void);
 

@@ -98,6 +98,8 @@
 #define MAPPER_SET_KEY(state, key) (state)->keys[(key) / 32] |= 1 << ((key) % 32)
 #define MAPPER_UNSET_KEY(state, key) (state)->keys[(key) / 32] &= ~(1 << ((key) % 32))
 
+#define INHERIT_JOYAXIS(binds) (((binds)[x_plus].joyaxis == (binds)[x_minus].joyaxis) || (  (binds)[y_plus].joyaxis == (binds)[y_minus].joyaxis))
+
 RETRO_BEGIN_DECLS
 
 enum rarch_movie_type
@@ -130,8 +132,8 @@ struct input_keyboard_line
    bool enabled;
 };
 
-extern struct retro_keybind input_config_binds[MAX_USERS][RARCH_BIND_LIST_END];
-extern struct retro_keybind input_autoconf_binds[MAX_USERS][RARCH_BIND_LIST_END];
+extern retro_keybind_set input_config_binds[MAX_USERS];
+extern retro_keybind_set input_autoconf_binds[MAX_USERS];
 
 struct rarch_joypad_info
 {
@@ -257,7 +259,7 @@ struct input_driver
          const input_device_driver_t *joypad_data,
          const input_device_driver_t *sec_joypad_data,
          rarch_joypad_info_t *joypad_info,
-         const struct retro_keybind **retro_keybinds,
+         const retro_keybind_set *retro_keybinds,
          bool keyboard_mapping_blocked,
          unsigned port, unsigned device, unsigned index, unsigned id);
 
@@ -377,6 +379,9 @@ typedef struct
 #endif
 
    /* pointers */
+#ifdef HAVE_HID
+   const void *hid_data;
+#endif
    void *keyboard_press_data;
    input_keyboard_line_t keyboard_line;                  /* ptr alignment */
    input_keyboard_press_t keyboard_press_cb;             /* ptr alignment */
@@ -384,7 +389,7 @@ typedef struct
    void                          *current_data;
    const input_device_driver_t   *primary_joypad;        /* ptr alignment */
    const input_device_driver_t   *secondary_joypad;      /* ptr alignment */
-   const struct retro_keybind *libretro_input_binds[MAX_USERS];
+   const retro_keybind_set *libretro_input_binds[MAX_USERS];
 #ifdef HAVE_COMMAND
    command_t *command[MAX_CMD_DRIVERS];
 #endif
@@ -399,13 +404,19 @@ typedef struct
    input_remote_t *remote;
 #endif
    char    *osk_grid[45];                                /* ptr alignment */ 
-
+#if defined(HAVE_TRANSLATE)
+#if defined(HAVE_ACCESSIBILITY)
+   int ai_gamepad_state[MAX_USERS];
+#endif
+#endif
    int osk_ptr;
    turbo_buttons_t turbo_btns; /* int32_t alignment */
 
    input_mapper_t mapper;          /* uint32_t alignment */
    input_device_info_t input_device_info[MAX_INPUT_DEVICES]; /* unsigned alignment */
    input_mouse_info_t input_mouse_info[MAX_INPUT_DEVICES];
+   unsigned old_analog_dpad_mode[MAX_USERS];
+   unsigned old_libretro_device[MAX_USERS];
    unsigned osk_last_codepoint;
    unsigned osk_last_codepoint_len;
    unsigned input_hotkey_block_counter;
@@ -428,6 +439,9 @@ typedef struct
    bool grab_mouse_state;
    bool analog_requested[MAX_USERS];
    bool keyboard_mapping_blocked;
+   bool old_analog_dpad_mode_set;
+   bool old_libretro_device_set;
+   bool remapping_cache_active;
    retro_bits_512_t keyboard_mapping_bits;    /* bool alignment */
    input_game_focus_state_t game_focus_state; /* bool alignment */
 } input_driver_state_t;
@@ -793,7 +807,7 @@ int16_t input_state_wrap(
       const input_device_driver_t *joypad,
       const input_device_driver_t *sec_joypad,
       rarch_joypad_info_t *joypad_info,
-      const struct retro_keybind **binds,
+      const retro_keybind_set *binds,
       bool keyboard_mapping_blocked,
       unsigned _port,
       unsigned device,
@@ -978,8 +992,7 @@ int16_t input_state_device(
 #ifdef HAVE_BSV_MOVIE
 void bsv_movie_frame_rewind(void);
 
-bool bsv_movie_init(struct rarch_state *p_rarch,
-      input_driver_state_t *input_st);
+bool bsv_movie_init(input_driver_state_t *input_st);
 
 void bsv_movie_deinit(input_driver_state_t *input_st);
 
@@ -1008,6 +1021,43 @@ void input_driver_poll(void);
  **/
 int16_t input_driver_state_wrapper(unsigned port, unsigned device,
       unsigned idx, unsigned id);
+
+/**
+ * input_keys_pressed:
+ *
+ * Grab an input sample for this frame.
+ *
+ * Returns: Input sample containing a mask of all pressed keys.
+ */
+void input_keys_pressed(
+      unsigned port,
+      bool is_menu,
+      int input_hotkey_block_delay,
+      input_bits_t *p_new_state,
+      const retro_keybind_set *binds,
+      const struct retro_keybind *binds_norm,
+      const struct retro_keybind *binds_auto,
+      const input_device_driver_t *joypad,
+      const input_device_driver_t *sec_joypad,
+      rarch_joypad_info_t *joypad_info);
+
+void input_driver_collect_system_input(input_driver_state_t *input_st,
+      settings_t *settings, input_bits_t *current_bits);
+
+/**
+ * input_keyboard_event:
+ * @down                     : Keycode was pressed down?
+ * @code                     : Keycode.
+ * @character                : Character inputted.
+ * @mod                      : TODO/FIXME: ???
+ *
+ * Keyboard event utils. Called by drivers when keyboard events 
+ * are fired.
+ * This interfaces with the global system driver struct 
+ * and libretro callbacks.
+ **/
+void input_keyboard_event(bool down, unsigned code,
+      uint32_t character, uint16_t mod, unsigned device);
 
 extern input_device_driver_t *joypad_drivers[];
 extern input_driver_t *input_drivers[];

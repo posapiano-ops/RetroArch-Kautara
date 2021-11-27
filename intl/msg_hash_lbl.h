@@ -63,6 +63,10 @@ MSG_HASH(
    "explore_item"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_EXPLORE_INITIALISING_LIST,
+   "explore_initialising_list"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_ADD_TAB,
    "add_tab"
    )
@@ -1971,6 +1975,10 @@ MSG_HASH(
    "netplay_tcp_udp_port"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_NETPLAY_MAX_CONNECTIONS,
+   "netplay_max_connections"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_NETPLAY_LAN_SCAN_SETTINGS,
    "Search for and connect to netplay hosts on the local network."
    )
@@ -3271,6 +3279,10 @@ MSG_HASH(
 MSG_HASH(
    MENU_ENUM_LABEL_VIDEO_FRAME_DELAY,
    "video_frame_delay"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VIDEO_FRAME_DELAY_AUTO,
+   "video_frame_delay_auto"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VIDEO_SHADER_DELAY,
@@ -4763,6 +4775,10 @@ MSG_HASH(
 MSG_HASH(
    MENU_ENUM_LABEL_NOTIFICATION_SHOW_REFRESH_RATE,
    "notification_show_refresh_rate"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_NOTIFICATION_SHOW_NETPLAY_EXTRA,
+   "notification_show_netplay_extra"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VIDEO_SHADERS_ENABLE,

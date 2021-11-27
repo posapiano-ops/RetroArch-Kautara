@@ -234,6 +234,8 @@ endif
 
 OBJ += frontend/frontend_driver.o \
        retroarch.o \
+       camera/camera_driver.o \
+       record/record_driver.o \
        command.o \
        msg_hash.o \
        midi_driver.o \
@@ -306,6 +308,7 @@ OBJ += \
        $(LIBRETRO_COMM_DIR)/file/file_path_io.o \
        file_path_special.o \
        $(LIBRETRO_COMM_DIR)/hash/lrc_hash.o \
+       audio/audio_driver.o \
        input/input_driver.o \
        input/common/input_hid_common.o \
        led/led_driver.o \
@@ -338,6 +341,10 @@ OBJ += \
 ifeq ($(HAVE_CHEATS), 1)
    DEFINES += -DHAVE_CHEATS
    OBJ     += cheat_manager.o
+endif
+
+ifeq ($(HAVE_CORE_INFO_CACHE), 1)
+   DEFINES += -DHAVE_CORE_INFO_CACHE
 endif
 
 OBJ += \
@@ -558,7 +565,8 @@ ifeq ($(HAVE_LIBRETRODB), 1)
           tasks/task_database_cue.o
 
    ifeq ($(HAVE_MENU), 1)
-      OBJ += menu/menu_explore.o
+      OBJ += menu/menu_explore.o \
+             tasks/task_menu_explore.o
    endif
 endif
 
@@ -1036,6 +1044,10 @@ ifeq ($(HAVE_LAKKA_SWITCH), 1)
    DEFINES += -DHAVE_LAKKA_SWITCH
 endif
 
+ifeq ($(HAVE_LAKKA_NIGHTLY), 1)
+   DEFINES += -DHAVE_LAKKA_NIGHTLY
+endif
+
 ifeq ($(HAVE_MENU_COMMON), 1)
    OBJ += menu/menu_setting.o \
           menu/menu_driver.o \
@@ -1083,13 +1095,13 @@ endif
 ifeq ($(HAVE_VIDEO_LAYOUT), 1)
    DEFINES += -DHAVE_VIDEO_LAYOUT
    OBJ += \
-			 gfx/video_layout.o \
-			 gfx/video_layout/view.o \
-			 gfx/video_layout/element.o \
-			 gfx/video_layout/component.o \
-			 gfx/video_layout/internal.o \
-			 gfx/video_layout/scope.o \
-			 gfx/video_layout/load.o
+	  gfx/video_layout.o \
+	  gfx/video_layout/view.o \
+	  gfx/video_layout/element.o \
+	  gfx/video_layout/component.o \
+	  gfx/video_layout/internal.o \
+	  gfx/video_layout/scope.o \
+	  gfx/video_layout/load.o
 endif
 
 ifeq ($(HAVE_STB_FONT), 1)
@@ -2110,7 +2122,6 @@ ifeq ($(HAVE_NETWORKING), 1)
       OBJ += cheevos/cheevos.o \
              cheevos/cheevos_client.o \
              cheevos/cheevos_menu.o \
-             cheevos/cheevos_parser.o \
              $(LIBRETRO_COMM_DIR)/formats/cdfs/cdfs.o \
              deps/rcheevos/src/rcheevos/alloc.o \
              deps/rcheevos/src/rcheevos/compat.o \
@@ -2131,7 +2142,6 @@ ifeq ($(HAVE_NETWORKING), 1)
              deps/rcheevos/src/rapi/rc_api_common.o \
              deps/rcheevos/src/rapi/rc_api_runtime.o \
              deps/rcheevos/src/rapi/rc_api_user.o \
-             deps/rcheevos/src/rurl/url.o
 
       ifeq ($(HAVE_LUA), 1)
          DEFINES += -DHAVE_LUA \
@@ -2188,6 +2198,8 @@ ifeq ($(HAVE_NETWORKING), 1)
       OBJ     += deps/discord-rpc/src/discord_rpc.o \
                  deps/discord-rpc/src/rpc_connection.o \
                  deps/discord-rpc/src/serialization.o
+
+      OBJ     += network/discord.o
 
       ifneq ($(findstring Win32,$(OS)),)
          OBJ  += deps/discord-rpc/src/discord_register_win.o \

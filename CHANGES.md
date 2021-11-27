@@ -1,4 +1,46 @@
 # Future
+- ANDROID/PLAYSTORE: Implement MANAGE_EXTERNAL_STORAGE permission
+- ANDROID/PLAYSTORE: Bump up SDK level to 30 to comply with Play Store policies
+- CHEEVOS: Fix need-to-activate achievement logic for non-hardcore
+- CHEEVOS: Don't queue rewind re-init if already on main thread
+- CHEEVOS: Ignore unofficial achievements unless setting is enabled
+- NETPLAY: Networking - should not print country for a local lobby
+- OVERLAYS: Revert changes
+- VIDEO/ROTATION: Always return false if rotation can't occur. RETRO_ENVIRONMENT_SET_ROTATION should return false when rotation has been forcefully disabled in frontend, that way the core can decide if aspect ratio should be rotated or not for vertical games. Useful for FBNeo for instance.
+- WIIU: Make wiiu_gfx_load_texture code safer
+
+# 1.9.13
+- CHEEVOS/MSVC2010: Add Cheevos support
+- CRT/SWITCHRES: Fixes some issue where scaling is incorrect in some video modes for CRT output.
+- FRAMEDELAY: Add 'Automatic Frame Delay' option
+- INPUT: Add 'All users control the menu' setting - any gamepad can control the menu when this is enabled. Only limitation right now is that only player 1 can toggle the menu, but any set Menu Toggle Controller Combo will work fine for all users, so this should be acceptable for now
+- INPUT/UDEV: Fix Dolphin bar and safeguard against not adding devices with no mouse or touch buttons detected
+- NETPLAY/CLI: -C/--connect commandline fix
+- NETPLAY: Other improvements
+- NETPLAY: Remove forced disconnection on unknown netplay command -
+will be backwards compatible with any version that removed this
+disconnect. instead of disconnecting, we just read the data and
+ignore, like most network implementations do
+- TASKS/CHEEVOS: Replace coroutines with tasks/thread
+- TASKS/DATABASE/EXPLORE: Initialise 'Explore' menu on a background thread - no more stall when hovering over the Explore tab
+
+# 1.9.12
+- 3DS: Ensure parallax barrier is disabled when '3DS Display Mode' is '2D'
+- COMMAND: Command interface should work again
+- INPUT/HID: Rewrote the HID deregistration algorithm; it should no longer cause issues when dealing with multiple pads of the same HID/VID combo
+- INPUT/HID: Fix initialization bug that caused wiimotes to fail to register without an accessory attached
+- INPUT/HID: Fix Wiimote regression
+- INPUT/HID/MAC: Get Sony Sixaxis (DualShock 3) working on MacOS
+- INPUT/UDEV: Add extra abs check for dolphinbar
+- INPUT/UDEV: Add relative left mouse button when pointer device is not abs
+- INPUT/WAYLAND: Fix keyboard input on Wayland - fixes 'Certain cores ignore user input'
+- NETPLAY: Improvements from Cthulhu
+- OPENDINGUX: Fix HAS_ANALOG/HAS_MENU_TOGGLE defines in sdl_dingux joypad driver
+- LIBRETRO: Enable SRAM for contentless cores
+- LIBRETRO: Add environment callback to get the rate retro_run is called - GET_THROTTLE_STATE and RETRO_THROTTLE_UNBLOCKED environment callback
+- LINUX: Update metadata manifest
+- MENU/OZONE: New themes - Solarized Light, Solarized Dark
+- WINDOWS/WIN9X: Fix non-ASCII text display in window title
 
 # 1.9.11
 - ANDROID: New launcher logo - will fill the corners on the homescreen

@@ -344,6 +344,7 @@
  */
 #define DEFAULT_FRAME_DELAY 0
 #define MAXIMUM_FRAME_DELAY 19
+#define DEFAULT_FRAME_DELAY_AUTO false
 
 /* Inserts black frame(s) inbetween frames.
  * Useful for Higher Hz monitors (set to multiples of 60 Hz) who want to play 60 Hz 
@@ -841,12 +842,16 @@ static const unsigned input_backtouch_toggle       = false;
 
 #define DEFAULT_OVERLAY_SHOW_INPUTS_PORT 0
 
-#define DEFAULT_ALL_USERS_CONTROL_MENU false
-
 #if defined(ANDROID) || defined(_WIN32)
 #define DEFAULT_MENU_SWAP_OK_CANCEL_BUTTONS true
 #else
 #define DEFAULT_MENU_SWAP_OK_CANCEL_BUTTONS false
+#endif
+
+#if defined(WIIU)
+#define DEFAULT_ALL_USERS_CONTROL_MENU true
+#else
+#define DEFAULT_ALL_USERS_CONTROL_MENU false
 #endif
 
 #define DEFAULT_QUIT_PRESS_TWICE true
@@ -1015,6 +1020,10 @@ static const bool audio_enable_menu_bgm    = false;
 #define DEFAULT_NOTIFICATION_SHOW_REFRESH_RATE true
 #endif
 
+#ifdef HAVE_NETWORKING
+#define DEFAULT_NOTIFICATION_SHOW_NETPLAY_EXTRA false
+#endif
+
 /* Output samplerate. */
 #ifdef GEKKO
 #define DEFAULT_OUTPUT_RATE 32000
@@ -1166,6 +1175,7 @@ static const bool netplay_use_mitm_server = false;
 #define DEFAULT_NETPLAY_MITM_SERVER "nyc"
 
 #ifdef HAVE_NETWORKING
+static const unsigned netplay_max_connections = 3;
 static const unsigned netplay_share_digital = RARCH_NETPLAY_SHARE_DIGITAL_NO_PREFERENCE;
 
 static const unsigned netplay_share_analog = RARCH_NETPLAY_SHARE_ANALOG_NO_PREFERENCE;

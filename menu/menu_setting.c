@@ -62,6 +62,7 @@
 #include "menu_setting.h"
 #include "menu_cbs.h"
 #include "menu_driver.h"
+#include "../camera/camera_driver.h"
 #include "../gfx/gfx_animation.h"
 #ifdef HAVE_GFX_WIDGETS
 #include "../gfx/gfx_widgets.h"
@@ -79,10 +80,12 @@
 #include "../paths.h"
 #include "../dynamic.h"
 #include "../list_special.h"
+#include "../audio/audio_driver.h"
 #include "../bluetooth/bluetooth_driver.h"
 #include "../wifi/wifi_driver.h"
 #include "../midi_driver.h"
 #include "../location_driver.h"
+#include "../record/record_driver.h"
 #include "../tasks/tasks_internal.h"
 #include "../config.def.h"
 #include "../ui/ui_companion_driver.h"
@@ -726,30 +729,24 @@ static void setting_get_string_representation_uint_as_enum(
 
 static float recalc_step_based_on_length_of_action(rarch_setting_t *setting)
 {
-   float       step = setting->step;
-   global_t *global = global_get_ptr();
-
-   if (global)
-   {
-      retro_time_t action_press_time = global->menu.action_press_time;
-      if      (action_press_time  > _21_SECONDS)
-         step = setting->step * 1000000.0f;
-      else if (action_press_time  > _18_SECONDS)
-         step = setting->step * 100000.0f;
-      else if (action_press_time  > _15_SECONDS)
-         step = setting->step * 10000.0f;
-      else if (action_press_time  > _12_SECONDS)
-         step = setting->step * 1000.0f;
-      else if (action_press_time  > _9_SECONDS)
-         step = setting->step * 100.0f;
-      else if (action_press_time  > _6_SECONDS)
-         step = setting->step * 10.0f;
-      else if (action_press_time  > _3_SECONDS)
-         step = setting->step * 5.0f;
-      else
-         step = setting->step;
-   }
-   return step < setting->step ? setting->step : step;
+   float                     step = setting->step;
+   struct menu_state *menu_st     = menu_state_get_ptr();
+   retro_time_t action_press_time = menu_st->action_press_time;
+   if      (action_press_time  > _21_SECONDS)
+      return step * 1000000.0f;
+   else if (action_press_time  > _18_SECONDS)
+      return step * 100000.0f;
+   else if (action_press_time  > _15_SECONDS)
+      return step * 10000.0f;
+   else if (action_press_time  > _12_SECONDS)
+      return step * 1000.0f;
+   else if (action_press_time  > _9_SECONDS)
+      return step * 100.0f;
+   else if (action_press_time  > _6_SECONDS)
+      return step * 10.0f;
+   else if (action_press_time  > _3_SECONDS)
+      return step * 5.0f;
+   return step;
 }
 
 int setting_uint_action_left_default(
@@ -4751,6 +4748,16 @@ static void setting_get_string_representation_uint_ozone_menu_color_theme(
          strlcpy(s,
                msg_hash_to_str(
                   MENU_ENUM_LABEL_VALUE_OZONE_COLOR_THEME_DRACULA), len);
+         break;
+      case OZONE_COLOR_THEME_SOLARIZED_DARK:
+         strlcpy(s,
+               msg_hash_to_str(
+                  MENU_ENUM_LABEL_VALUE_OZONE_COLOR_THEME_SOLARIZED_DARK), len);
+         break;
+      case OZONE_COLOR_THEME_SOLARIZED_LIGHT:
+         strlcpy(s,
+               msg_hash_to_str(
+                  MENU_ENUM_LABEL_VALUE_OZONE_COLOR_THEME_SOLARIZED_LIGHT), len);
          break;
       case OZONE_COLOR_THEME_BASIC_WHITE:
       default:
@@ -8878,6 +8885,7 @@ static bool setting_append_list(
    unsigned user;
    rarch_setting_group_info_t group_info;
    rarch_setting_group_info_t subgroup_info;
+   recording_state_t *recording_st           = recording_state_get_ptr();
 
    group_info.name                           = NULL;
    subgroup_info.name                        = NULL;
@@ -9902,6 +9910,11 @@ static bool setting_append_list(
 #endif
             for (i = 0; i < ARRAY_SIZE(bool_entries); i++)
             {
+#if defined(HAVE_CORE_INFO_CACHE)
+               if (bool_entries[i].name_enum_idx ==
+                     MENU_ENUM_LABEL_CORE_INFO_CACHE_ENABLE)
+                  continue;
+#endif
                CONFIG_BOOL(
                      list, list_info,
                      bool_entries[i].target,
@@ -12162,6 +12175,23 @@ static bool setting_append_list(
             menu_settings_list_current_add_range(list, list_info, 0, MAXIMUM_FRAME_DELAY, 1, true, true);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
 
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.video_frame_delay_auto,
+                  MENU_ENUM_LABEL_VIDEO_FRAME_DELAY_AUTO,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_FRAME_DELAY_AUTO,
+                  DEFAULT_FRAME_DELAY_AUTO,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE
+                  );
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+
             /* Unlike all other shader-related menu entries
              * (which appear in the shaders quick menu, and
              * are thus hidden automatically on platforms
@@ -13171,6 +13201,22 @@ static bool setting_append_list(
 
             CONFIG_BOOL(
                   list, list_info,
+                  &settings->bools.input_all_users_control_menu,
+                  MENU_ENUM_LABEL_INPUT_ALL_USERS_CONTROL_MENU,
+                  MENU_ENUM_LABEL_VALUE_INPUT_ALL_USERS_CONTROL_MENU,
+                  DEFAULT_ALL_USERS_CONTROL_MENU,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE
+                  );
+
+            CONFIG_BOOL(
+                  list, list_info,
                   &settings->bools.input_remap_binds_enable,
                   MENU_ENUM_LABEL_INPUT_REMAP_BINDS_ENABLE,
                   MENU_ENUM_LABEL_VALUE_INPUT_REMAP_BINDS_ENABLE,
@@ -13619,6 +13665,7 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].offset_by = 1;
             menu_settings_list_current_add_range(list, list_info, 1, 65536, 1, true, true);
 
+
             CONFIG_UINT(
                list, list_info,
                &settings->uints.video_stream_quality,
@@ -13685,8 +13732,8 @@ static bool setting_append_list(
 
             CONFIG_DIR(
                list, list_info,
-               global->record.output_dir,
-               sizeof(global->record.output_dir),
+               recording_st->output_dir,
+               sizeof(recording_st->output_dir),
                MENU_ENUM_LABEL_RECORDING_OUTPUT_DIRECTORY,
                MENU_ENUM_LABEL_VALUE_RECORDING_OUTPUT_DIRECTORY,
                g_defaults.dirs[DEFAULT_DIR_RECORD_OUTPUT],
@@ -14531,6 +14578,23 @@ static bool setting_append_list(
                general_write_handler,
                general_read_handler,
                SD_FLAG_NONE);
+
+#ifdef HAVE_NETWORKING
+         CONFIG_BOOL(
+               list, list_info,
+               &settings->bools.notification_show_netplay_extra,
+               MENU_ENUM_LABEL_NOTIFICATION_SHOW_NETPLAY_EXTRA,
+               MENU_ENUM_LABEL_VALUE_NOTIFICATION_SHOW_NETPLAY_EXTRA,
+               DEFAULT_NOTIFICATION_SHOW_NETPLAY_EXTRA,
+               MENU_ENUM_LABEL_VALUE_OFF,
+               MENU_ENUM_LABEL_VALUE_ON,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler,
+               SD_FLAG_NONE);
+#endif
 
          END_SUB_GROUP(list, list_info, parent_group);
          END_GROUP(list, list_info, parent_group);
@@ -18999,6 +19063,21 @@ static bool setting_append_list(
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ADVANCED);
 
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.netplay_max_connections,
+                  MENU_ENUM_LABEL_NETPLAY_MAX_CONNECTIONS,
+                  MENU_ENUM_LABEL_VALUE_NETPLAY_MAX_CONNECTIONS,
+                  netplay_max_connections,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_UINT_SPINBOX;
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            menu_settings_list_current_add_range(list, list_info, 1, 31, 1, true, true);
+
             CONFIG_STRING(
                   list, list_info,
                   settings->paths.netplay_password,
@@ -19960,8 +20039,8 @@ static bool setting_append_list(
          {
             CONFIG_DIR(
                   list, list_info,
-                  global->record.output_dir,
-                  sizeof(global->record.output_dir),
+                  recording_st->output_dir,
+                  sizeof(recording_st->output_dir),
                   MENU_ENUM_LABEL_RECORDING_OUTPUT_DIRECTORY,
                   MENU_ENUM_LABEL_VALUE_RECORDING_OUTPUT_DIRECTORY,
                   g_defaults.dirs[DEFAULT_DIR_RECORD_OUTPUT],
@@ -19975,8 +20054,8 @@ static bool setting_append_list(
 
             CONFIG_DIR(
                   list, list_info,
-                  global->record.config_dir,
-                  sizeof(global->record.config_dir),
+                  recording_st->config_dir,
+                  sizeof(recording_st->config_dir),
                   MENU_ENUM_LABEL_RECORDING_CONFIG_DIRECTORY,
                   MENU_ENUM_LABEL_VALUE_RECORDING_CONFIG_DIRECTORY,
                   g_defaults.dirs[DEFAULT_DIR_RECORD_CONFIG],

@@ -47,7 +47,6 @@
 #ifdef HAVE_NETWORKING
 #include <net/net_http_parse.h>
 #include "../../network/netplay/netplay.h"
-#include "../network/netplay/netplay_discovery.h"
 #include "../core_updater_list.h"
 #endif
 
@@ -76,6 +75,8 @@
 #include <media/media_detect_cd.h>
 #endif
 
+#include "../audio/audio_driver.h"
+#include "../record/record_driver.h"
 #include "menu_cbs.h"
 #include "menu_driver.h"
 #include "menu_entries.h"
@@ -101,6 +102,9 @@
 #include "../frontend/frontend_driver.h"
 #include "../ui/ui_companion_driver.h"
 #include "../gfx/video_display_server.h"
+#ifdef HAVE_GFX_WIDGETS
+#include "../gfx/gfx_widgets.h"
+#endif
 #include "../config.features.h"
 #include "../version_git.h"
 #include "../list_special.h"
@@ -188,15 +192,16 @@ static void filebrowser_parse(
    {
       if (filebrowser_type == FILEBROWSER_SELECT_FILE_SUBSYSTEM)
       {
-         rarch_system_info_t *system          = &runloop_state_get_ptr()->system;
+         runloop_state_t *runloop_st          = runloop_state_get_ptr();
+         rarch_system_info_t *system          = &runloop_st->system;
          /* Core fully loaded, use the subsystem data */
          if (system->subsystem.data)
             subsystem = system->subsystem.data + content_get_subsystem();
          /* Core not loaded completely, use the data we peeked on load core */
          else
-            subsystem = subsystem_data + content_get_subsystem();
+            subsystem = runloop_st->subsystem_data + content_get_subsystem();
 
-         if (subsystem && subsystem_current_count > 0)
+         if (subsystem && runloop_st->subsystem_current_count > 0)
             ret = file_archive_get_file_list_noalloc(&str_list,
                   path,
                   subsystem->roms[
@@ -218,15 +223,16 @@ static void filebrowser_parse(
 
       if (filebrowser_type == FILEBROWSER_SELECT_FILE_SUBSYSTEM)
       {
-         rarch_system_info_t *system          = &runloop_state_get_ptr()->system;
+         runloop_state_t *runloop_st = runloop_state_get_ptr();
+         rarch_system_info_t *system = &runloop_st->system;
          /* Core fully loaded, use the subsystem data */
          if (system->subsystem.data)
             subsystem = system->subsystem.data + content_get_subsystem();
          /* Core not loaded completely, use the data we peeked on load core */
          else
-            subsystem = subsystem_data + content_get_subsystem();
+            subsystem = runloop_st->subsystem_data + content_get_subsystem();
 
-         if (subsystem && subsystem_current_count > 0 && content_get_subsystem_rom_id() < subsystem->num_roms)
+         if (subsystem && runloop_st->subsystem_current_count > 0 && content_get_subsystem_rom_id() < subsystem->num_roms)
             ret = dir_list_initialize(&str_list,
                   path,
                   filter_ext ? subsystem->roms[content_get_subsystem_rom_id()].valid_extensions : NULL,
@@ -2995,7 +3001,8 @@ static int menu_displaylist_parse_load_content_settings(
 
       if (string_is_not_equal(settings->arrays.record_driver, "null"))
       {
-         if (!recording_is_enabled())
+         recording_state_t *recording_st = recording_state_get_ptr();
+         if (!recording_st->enable)
          {
             if (settings->bools.quick_menu_show_start_recording && !settings->bools.kiosk_mode_enable)
             {
@@ -3017,7 +3024,8 @@ static int menu_displaylist_parse_load_content_settings(
          }
          else
          {
-            if (streaming_is_enabled())
+            recording_state_t *recording_st = recording_state_get_ptr();
+            if (recording_st->streaming_enable)
             {
                if (menu_entries_append_enum(list,
                         msg_hash_to_str(MENU_ENUM_LABEL_VALUE_QUICK_MENU_STOP_STREAMING),
@@ -5333,7 +5341,9 @@ static unsigned menu_displaylist_populate_subsystem(
 
    if (menu_displaylist_has_subsystems())
    {
-      for (i = 0; i < subsystem_current_count; i++, subsystem++)
+      runloop_state_t *runloop_st = runloop_state_get_ptr();
+
+      for (i = 0; i < runloop_st->subsystem_current_count; i++, subsystem++)
       {
          char s[PATH_MAX_LENGTH];
          if (content_get_subsystem() == i)
@@ -5495,8 +5505,9 @@ unsigned menu_displaylist_build_list(
    {
       case DISPLAYLIST_SUBSYSTEM_SETTINGS_LIST:
          {
-            const struct retro_subsystem_info* subsystem = subsystem_data;
-            rarch_system_info_t *sys_info                = &runloop_state_get_ptr()->system;
+            runloop_state_t *runloop_st                  = runloop_state_get_ptr();
+            const struct retro_subsystem_info* subsystem = runloop_st->subsystem_data;
+            rarch_system_info_t *sys_info                = &runloop_st->system;
             /* Core not loaded completely, use the data we
              * peeked on load core */
 
@@ -6249,7 +6260,7 @@ unsigned menu_displaylist_build_list(
 
             for (p = 0; p < max_users; p++)
             {
-               char val_s[16], val_d[16];
+               char val_s[256], val_d[16];
                snprintf(val_s, sizeof(val_s),
                      msg_hash_to_str(MENU_ENUM_LABEL_VALUE_INPUT_USER_BINDS),
                      p+1);
@@ -6369,6 +6380,10 @@ unsigned menu_displaylist_build_list(
             count++;
          if (MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(list,
                   MENU_ENUM_LABEL_MENU_INPUT_SWAP_OK_CANCEL,
+                  PARSE_ONLY_BOOL, false) == 0)
+            count++;
+         if (MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(list,
+                  MENU_ENUM_LABEL_INPUT_ALL_USERS_CONTROL_MENU,
                   PARSE_ONLY_BOOL, false) == 0)
             count++;
          if (MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(list,
@@ -7282,6 +7297,7 @@ unsigned menu_displaylist_build_list(
                {MENU_ENUM_LABEL_NETPLAY_MITM_SERVER,                                   PARSE_ONLY_STRING, false},
                {MENU_ENUM_LABEL_NETPLAY_IP_ADDRESS,                                    PARSE_ONLY_STRING, true},
                {MENU_ENUM_LABEL_NETPLAY_TCP_UDP_PORT,                                  PARSE_ONLY_UINT,   true},
+               {MENU_ENUM_LABEL_NETPLAY_MAX_CONNECTIONS,                               PARSE_ONLY_UINT,   true},
                {MENU_ENUM_LABEL_NETPLAY_PASSWORD,                                      PARSE_ONLY_STRING, true},
                {MENU_ENUM_LABEL_NETPLAY_SPECTATE_PASSWORD,                             PARSE_ONLY_STRING, true},
                {MENU_ENUM_LABEL_NETPLAY_START_AS_SPECTATOR,                            PARSE_ONLY_BOOL,   true},
@@ -7993,6 +8009,10 @@ unsigned menu_displaylist_build_list(
                         MENU_ENUM_LABEL_VIDEO_FRAME_DELAY,
                         PARSE_ONLY_UINT, false) == 0)
                   count++;
+               if (MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(list,
+                        MENU_ENUM_LABEL_VIDEO_FRAME_DELAY_AUTO,
+                        PARSE_ONLY_BOOL, false) == 0)
+                  count++;
             }
 
             if (video_driver_test_all_flags(GFX_CTX_FLAGS_HARD_SYNC))
@@ -8412,6 +8432,7 @@ unsigned menu_displaylist_build_list(
             bool video_hard_sync          = settings->bools.video_hard_sync;
             menu_displaylist_build_info_selective_t build_list[] = {
                {MENU_ENUM_LABEL_VIDEO_FRAME_DELAY,                     PARSE_ONLY_UINT, true },
+               {MENU_ENUM_LABEL_VIDEO_FRAME_DELAY_AUTO,                PARSE_ONLY_BOOL, true },
                {MENU_ENUM_LABEL_AUDIO_LATENCY,                         PARSE_ONLY_UINT, true },
                {MENU_ENUM_LABEL_INPUT_POLL_TYPE_BEHAVIOR,              PARSE_ONLY_UINT, true },
                {MENU_ENUM_LABEL_INPUT_BLOCK_TIMEOUT,                   PARSE_ONLY_UINT, true },
@@ -8616,6 +8637,9 @@ unsigned menu_displaylist_build_list(
 #endif
 #endif
                {MENU_ENUM_LABEL_NOTIFICATION_SHOW_REFRESH_RATE,          PARSE_ONLY_BOOL,  false },
+#ifdef HAVE_NETWORKING
+               {MENU_ENUM_LABEL_NOTIFICATION_SHOW_NETPLAY_EXTRA,         PARSE_ONLY_BOOL,  false },
+#endif
             };
 
             for (i = 0; i < ARRAY_SIZE(build_list); i++)
@@ -9619,6 +9643,7 @@ unsigned menu_displaylist_netplay_refresh_rooms(file_list_t *list)
    char s[8300];
    int i                                = 0;
    unsigned count                       = 0;
+   net_driver_state_t *net_st           = networking_state_get_ptr();
 
    s[0]                                 = '\0';
 
@@ -9664,15 +9689,15 @@ unsigned menu_displaylist_netplay_refresh_rooms(file_list_t *list)
          MENU_SETTING_ACTION, 0, 0))
       count++;
 
-   if (netplay_room_count != 0)
+   if (net_st->room_count != 0)
    {
-      for (i = 0; i < netplay_room_count; i++)
+      for (i = 0; i < net_st->room_count; i++)
       {
-         char country[PATH_MAX_LENGTH];
+         char country[8];
 
-         if (*netplay_room_list[i].country)
+         if (*net_st->room_list[i].country)
             snprintf(country, sizeof(country),
-                  "(%s)", netplay_room_list[i].country);
+                  "(%s)", net_st->room_list[i].country);
 
          /* Uncomment this to debug mismatched room parameters*/
 #if 0
@@ -9685,23 +9710,26 @@ unsigned menu_displaylist_netplay_refresh_rooms(file_list_t *list)
                "Game:             %s\n"
                "Game CRC:         %08x\n"
                "Timestamp:        %d\n", room_data->elems[j + 6].data,
-               netplay_room_list[i].nickname,
-               netplay_room_list[i].address,
-               netplay_room_list[i].port,
-               netplay_room_list[i].corename,
-               netplay_room_list[i].coreversion,
-               netplay_room_list[i].gamename,
-               netplay_room_list[i].gamecrc,
-               netplay_room_list[i].timestamp);
+               net_st->room_list[i].nickname,
+               net_st->room_list[i].address,
+               net_st->room_list[i].port,
+               net_st->room_list[i].corename,
+               net_st->room_list[i].coreversion,
+               net_st->room_list[i].gamename,
+               net_st->room_list[i].gamecrc,
+               net_st->room_list[i].timestamp);
 #endif
 
          snprintf(s, sizeof(s), "%s: %s%s",
-            netplay_room_list[i].lan 
+            net_st->room_list[i].lan 
             ? msg_hash_to_str(MSG_LOCAL) 
-            : (netplay_room_list[i].host_method == NETPLAY_HOST_METHOD_MITM 
+            : (net_st->room_list[i].host_method 
+               == NETPLAY_HOST_METHOD_MITM 
                ? msg_hash_to_str(MSG_INTERNET_RELAY) 
                : msg_hash_to_str(MSG_INTERNET)),
-            netplay_room_list[i].nickname, country);
+            net_st->room_list[i].nickname,
+            net_st->room_list[i].lan ? "" : country
+            );
 
          if (menu_entries_append_enum(list,
                s,
@@ -9807,7 +9835,7 @@ static unsigned print_buf_lines(file_list_t *list, char *buf,
       line_start     = buf + i + 1;
    }
 
-   if (append)
+   if (append && type != FILE_TYPE_DOWNLOAD_LAKKA)
       file_list_sort_on_alt(list);
    /* If the buffer was completely full, and didn't end
     * with a newline, just ignore the partial last line. */
@@ -9818,14 +9846,15 @@ static unsigned print_buf_lines(file_list_t *list, char *buf,
 
 bool menu_displaylist_has_subsystems(void)
 {
-   const struct retro_subsystem_info* subsystem = subsystem_data;
-   rarch_system_info_t *sys_info                = &runloop_state_get_ptr()->system;
+   runloop_state_t *runloop_st                  = runloop_state_get_ptr();
+   const struct retro_subsystem_info* subsystem = runloop_st->subsystem_data;
+   rarch_system_info_t *sys_info                = &runloop_st->system;
    /* Core not loaded completely, use the data we
     * peeked on load core */
    /* Core fully loaded, use the subsystem data */
    if (sys_info && sys_info->subsystem.data)
       subsystem = sys_info->subsystem.data;
-   return (subsystem && subsystem_current_count > 0);
+   return (subsystem && runloop_st->subsystem_current_count > 0);
 }
 
 bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
@@ -9856,6 +9885,7 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
             file_list_t *list              = info->list;
             menu_displaylist_build_info_selective_t build_list[] = {
                {MENU_ENUM_LABEL_NETPLAY_TCP_UDP_PORT,                                  PARSE_ONLY_UINT,   true},
+               {MENU_ENUM_LABEL_NETPLAY_MAX_CONNECTIONS,                               PARSE_ONLY_UINT,   true},
                {MENU_ENUM_LABEL_NETPLAY_PUBLIC_ANNOUNCE,                               PARSE_ONLY_BOOL,   true  },
                {MENU_ENUM_LABEL_NETPLAY_USE_MITM_SERVER,                               PARSE_ONLY_BOOL,   true  },
                {MENU_ENUM_LABEL_NETPLAY_MITM_SERVER,                                   PARSE_ONLY_STRING, false},

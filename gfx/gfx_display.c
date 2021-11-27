@@ -464,40 +464,43 @@ void gfx_display_scissor_begin(
       int x, int y, unsigned width, unsigned height)
 {
    gfx_display_ctx_driver_t *dispctx = p_disp->dispctx;
-   if (y < 0)
+   if (dispctx && dispctx->scissor_begin)
    {
-      if (height < (unsigned)(-y))
-         height  = 0;
-      else
-         height += y;
-      y          = 0;
-   }
-   if (x < 0)
-   {
-      if (width < (unsigned)(-x))
-         width   = 0;
-      else
-         width  += x;
-      x          = 0;
-   }
-   if (y >= (int)video_height)
-   {
-      height     = 0;
-      y          = 0;
-   }
-   if (x >= (int)video_width)
-   {
-      width      = 0;
-      x          = 0;
-   }
-   if ((y + height) > video_height)
-      height     = video_height - y;
-   if ((x + width) > video_width)
-      width      = video_width - x;
+      if (y < 0)
+      {
+         if (height < (unsigned)(-y))
+            height  = 0;
+         else
+            height += y;
+         y          = 0;
+      }
+      if (x < 0)
+      {
+         if (width < (unsigned)(-x))
+            width   = 0;
+         else
+            width  += x;
+         x          = 0;
+      }
+      if (y >= (int)video_height)
+      {
+         height     = 0;
+         y          = 0;
+      }
+      if (x >= (int)video_width)
+      {
+         width      = 0;
+         x          = 0;
+      }
+      if ((y + height) > video_height)
+         height     = video_height - y;
+      if ((x + width) > video_width)
+         width      = video_width - x;
 
-   dispctx->scissor_begin(userdata,
-         video_width, video_height,
-         x, y, width, height);
+      dispctx->scissor_begin(userdata,
+            video_width, video_height,
+            x, y, width, height);
+   }
 }
 
 font_data_t *gfx_display_font_file(
@@ -523,6 +526,49 @@ font_data_t *gfx_display_font_file(
       return NULL;
 
    return font_data;
+}
+
+/* Draw text on top of the screen */
+void gfx_display_draw_text(
+      const font_data_t *font, const char *text,
+      float x, float y, int width, int height,
+      uint32_t color, enum text_alignment text_align,
+      float scale, bool shadows_enable, float shadow_offset,
+      bool draw_outside)
+{
+   struct font_params params;
+   video_driver_state_t *video_st = video_state_get_ptr();
+
+   if ((color & 0x000000FF) == 0)
+      return;
+
+   /* Don't draw outside of the screen */
+   if (!draw_outside &&
+           ((x < -64 || x > width  + 64)
+         || (y < -64 || y > height + 64))
+      )
+      return;
+
+   params.x           = x / width;
+   params.y           = 1.0f - y / height;
+   params.scale       = scale;
+   params.drop_mod    = 0.0f;
+   params.drop_x      = 0.0f;
+   params.drop_y      = 0.0f;
+   params.color       = color;
+   params.full_screen = true;
+   params.text_align  = text_align;
+
+   if (shadows_enable)
+   {
+      params.drop_x      = shadow_offset;
+      params.drop_y      = -shadow_offset;
+      params.drop_alpha  = 0.35f;
+   }
+
+   if (video_st->poke && video_st->poke->set_osd_msg)
+      video_st->poke->set_osd_msg(video_st->data,
+            text, &params, (void*)font);
 }
 
 void gfx_display_draw_bg(

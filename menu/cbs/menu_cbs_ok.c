@@ -55,6 +55,8 @@
 #include "../../core.h"
 #include "../../configuration.h"
 #include "../../core_info.h"
+#include "../../audio/audio_driver.h"
+#include "../../record/record_driver.h"
 #include "../../frontend/frontend_driver.h"
 #include "../../defaults.h"
 #include "../../core_option_manager.h"
@@ -81,9 +83,6 @@
 
 #ifdef HAVE_NETWORKING
 #include "../../network/netplay/netplay.h"
-/* TODO/FIXME - we can't ifdef netplay_discovery.h because of these pesky globals 'netplay_room_count' and 'netplay_room_list' - let's please get rid of them */
-#include "../../network/netplay/netplay_discovery.h"
-
 #include "../../wifi/wifi_driver.h"
 #endif
 
@@ -554,6 +553,7 @@ int generic_action_ok_displaylist_push(const char *path,
 #endif
    const char *dir_menu_content            = settings->paths.directory_menu_content;
    const char *dir_libretro                = settings->paths.directory_libretro;
+   recording_state_t *recording_st         = recording_state_get_ptr();
 
    if (!menu || string_is_equal(menu_ident, "null"))
    {
@@ -1072,7 +1072,7 @@ int generic_action_ok_displaylist_push(const char *path,
             global_t  *global  = global_get_ptr();
             info.type          = type;
             info.directory_ptr = idx;
-            info_path          = global->record.config_dir;
+            info_path          = recording_st->config_dir;
             info_label         = label;
             dl_type            = DISPLAYLIST_FILE_BROWSER_SELECT_FILE;
          }
@@ -1083,7 +1083,7 @@ int generic_action_ok_displaylist_push(const char *path,
             global_t  *global  = global_get_ptr();
             info.type          = type;
             info.directory_ptr = idx;
-            info_path          = global->record.config_dir;
+            info_path          = recording_st->config_dir;
             info_label         = label;
             dl_type            = DISPLAYLIST_FILE_BROWSER_SELECT_FILE;
          }
@@ -1125,7 +1125,7 @@ int generic_action_ok_displaylist_push(const char *path,
          {
             content_ctx_info_t content_info = {0};
             filebrowser_clear_type();
-            task_push_load_subsystem_with_core_from_menu(
+            task_push_load_subsystem_with_core(
                   NULL, &content_info,
                   CORE_TYPE_PLAIN, NULL, NULL);
          }
@@ -2137,7 +2137,7 @@ static int default_action_ok_load_content_with_core_from_menu(const char *_path,
    content_info.argv                   = NULL;
    content_info.args                   = NULL;
    content_info.environ_get            = NULL;
-   if (!task_push_load_content_with_core_from_menu(
+   if (!task_push_load_content_with_core(
             _path, &content_info,
             (enum rarch_core_type)_type, NULL, NULL))
       return -1;
@@ -2501,7 +2501,7 @@ static int action_ok_playlist_entry_collection(const char *path,
       for (i = 0; i < entry->subsystem_roms->size; i++)
          content_add_subsystem(entry->subsystem_roms->elems[i].data);
 
-      task_push_load_subsystem_with_core_from_menu(
+      task_push_load_subsystem_with_core(
             NULL, &content_info,
             CORE_TYPE_PLAIN, NULL, NULL);
 
@@ -2691,7 +2691,7 @@ static int action_ok_load_cdrom(const char *path,
          content_info.args        = NULL;
          content_info.environ_get = NULL;
 
-         task_push_load_content_with_core_from_menu(cdrom_path, &content_info, CORE_TYPE_PLAIN, NULL, NULL);
+         task_push_load_content_with_core(cdrom_path, &content_info, CORE_TYPE_PLAIN, NULL, NULL);
       }
 #else
       frontend_driver_set_fork(FRONTEND_FORK_CORE_WITH_ARGS);
@@ -5181,8 +5181,8 @@ static int action_ok_add_to_favorites(const char *path,
     * > If content path is empty, cannot do anything... */
    if (!string_is_empty(content_path))
    {
-      global_t *global                 = global_get_ptr();
-      struct retro_system_info *system = &runloop_state_get_ptr()->system.info;
+      runloop_state_t *runloop_st      = runloop_state_get_ptr();
+      struct retro_system_info *system = &runloop_st->system.info;
       struct string_list *str_list     = NULL;
       const char *crc32                = NULL;
       const char *db_name              = NULL;
@@ -5205,9 +5205,9 @@ static int action_ok_add_to_favorites(const char *path,
       /* Determine playlist parameters */
 
       /* > content_label */
-      if (global)
-         if (!string_is_empty(global->name.label))
-            strlcpy(content_label, global->name.label, sizeof(content_label));
+      if (!string_is_empty(runloop_st->name.label))
+         strlcpy(content_label, runloop_st->name.label,
+               sizeof(content_label));
 
       /* Label is empty - use file name instead */
       if (string_is_empty(content_label))
@@ -5702,43 +5702,44 @@ static int action_ok_netplay_connect_room(const char *path,
       const char *label, unsigned type, size_t idx, size_t entry_idx)
 {
    char tmp_hostname[4115];
-   unsigned room_index = type - MENU_SETTINGS_NETPLAY_ROOMS_START;
+   net_driver_state_t *net_st = networking_state_get_ptr();
+   unsigned room_index        = type - MENU_SETTINGS_NETPLAY_ROOMS_START;
 
-   tmp_hostname[0] = '\0';
-
-   if (room_index >= (unsigned)netplay_room_count)
+   if (room_index >= (unsigned)net_st->room_count)
       return menu_cbs_exit();
+
+   tmp_hostname[0]            = '\0';
 
    if (netplay_driver_ctl(RARCH_NETPLAY_CTL_IS_DATA_INITED, NULL))
       generic_action_ok_command(CMD_EVENT_NETPLAY_DEINIT);
    netplay_driver_ctl(RARCH_NETPLAY_CTL_ENABLE_CLIENT, NULL);
 
-   if (netplay_room_list[room_index].host_method == NETPLAY_HOST_METHOD_MITM)
+   if (net_st->room_list[room_index].host_method == NETPLAY_HOST_METHOD_MITM)
       snprintf(tmp_hostname,
             sizeof(tmp_hostname),
             "%s|%d",
-         netplay_room_list[room_index].mitm_address,
-         netplay_room_list[room_index].mitm_port);
+         net_st->room_list[room_index].mitm_address,
+         net_st->room_list[room_index].mitm_port);
    else
       snprintf(tmp_hostname,
             sizeof(tmp_hostname),
             "%s|%d",
-         netplay_room_list[room_index].address,
-         netplay_room_list[room_index].port);
+         net_st->room_list[room_index].address,
+         net_st->room_list[room_index].port);
 
 #if 0
    RARCH_LOG("[lobby] connecting to: %s with game: %s/%08x\n",
          tmp_hostname,
-         netplay_room_list[room_index].gamename,
-         netplay_room_list[room_index].gamecrc);
+         net_st->room_list[room_index].gamename,
+         net_st->room_list[room_index].gamecrc);
 #endif
 
    task_push_netplay_crc_scan(
-         netplay_room_list[room_index].gamecrc,
-         netplay_room_list[room_index].gamename,
+         net_st->room_list[room_index].gamecrc,
+         net_st->room_list[room_index].gamename,
          tmp_hostname,
-         netplay_room_list[room_index].corename,
-         netplay_room_list[room_index].subsystem_name);
+         net_st->room_list[room_index].corename,
+         net_st->room_list[room_index].subsystem_name);
 
    return 0;
 }
@@ -5833,7 +5834,7 @@ static void netplay_refresh_rooms_cb(retro_task_t *task,
    const char *label             = NULL;
    unsigned menu_type            = 0;
    enum msg_hash_enums enum_idx  = MSG_UNKNOWN;
-
+   net_driver_state_t *net_st    = networking_state_get_ptr();
    http_transfer_data_t *data    = (http_transfer_data_t*)task_data;
 
    menu_entries_get_last_stack(&path, &label, &menu_type, &enum_idx, NULL);
@@ -5859,7 +5860,7 @@ static void netplay_refresh_rooms_cb(retro_task_t *task,
             STRLEN_CONST("registry.lpl")))
    {
       if (string_is_empty(data->data))
-         netplay_room_count = 0;
+         net_st->room_count = 0;
       else
       {
          char s[PATH_MAX_LENGTH];
@@ -5877,63 +5878,63 @@ static void netplay_refresh_rooms_cb(retro_task_t *task,
 
          netplay_rooms_parse(data->data);
 
-         if (netplay_room_list)
-            free(netplay_room_list);
+         if (net_st->room_list)
+            free(net_st->room_list);
 
          /* TODO/FIXME - right now, a LAN and non-LAN netplay session might appear
           * in the same list. If both entries are available, we want to show only
           * the LAN one. */
 
-         netplay_room_count                   = netplay_rooms_get_count();
-         netplay_room_list                    = (struct netplay_room*)
-            calloc(netplay_room_count + lan_room_count,
+         net_st->room_count                   = netplay_rooms_get_count();
+         net_st->room_list                    = (struct netplay_room*)
+            calloc(net_st->room_count + lan_room_count,
                   sizeof(struct netplay_room));
 
-         for (i = 0; i < (unsigned)netplay_room_count; i++)
-            memcpy(&netplay_room_list[i], netplay_room_get(i), sizeof(netplay_room_list[i]));
+         for (i = 0; i < (unsigned)net_st->room_count; i++)
+            memcpy(&net_st->room_list[i], netplay_room_get(i), sizeof(net_st->room_list[i]));
 
          if (lan_room_count != 0)
          {
-            for (i = netplay_room_count; i < (unsigned)(netplay_room_count + lan_room_count); i++)
+            for (i = net_st->room_count; i < (unsigned)(net_st->room_count + lan_room_count); i++)
             {
                struct netplay_host *host = &lan_hosts->hosts[j++];
 
-               strlcpy(netplay_room_list[i].nickname,
+               strlcpy(net_st->room_list[i].nickname,
                      host->nick,
-                     sizeof(netplay_room_list[i].nickname));
+                     sizeof(net_st->room_list[i].nickname));
 
-               strlcpy(netplay_room_list[i].address,
+               strlcpy(net_st->room_list[i].address,
                      host->address,
                      INET6_ADDRSTRLEN);
-               strlcpy(netplay_room_list[i].corename,
+               strlcpy(net_st->room_list[i].corename,
                      host->core,
-                     sizeof(netplay_room_list[i].corename));
-               strlcpy(netplay_room_list[i].retroarch_version,
+                     sizeof(net_st->room_list[i].corename));
+               strlcpy(net_st->room_list[i].retroarch_version,
                      host->retroarch_version,
-                     sizeof(netplay_room_list[i].retroarch_version));
-               strlcpy(netplay_room_list[i].coreversion,
+                     sizeof(net_st->room_list[i].retroarch_version));
+               strlcpy(net_st->room_list[i].coreversion,
                      host->core_version,
-                     sizeof(netplay_room_list[i].coreversion));
-               strlcpy(netplay_room_list[i].gamename,
+                     sizeof(net_st->room_list[i].coreversion));
+               strlcpy(net_st->room_list[i].gamename,
                      host->content,
-                     sizeof(netplay_room_list[i].gamename));
-               strlcpy(netplay_room_list[i].frontend,
+                     sizeof(net_st->room_list[i].gamename));
+               strlcpy(net_st->room_list[i].frontend,
                      host->frontend,
-                     sizeof(netplay_room_list[i].frontend));
-               strlcpy(netplay_room_list[i].subsystem_name,
+                     sizeof(net_st->room_list[i].frontend));
+               strlcpy(net_st->room_list[i].subsystem_name,
                      host->subsystem_name,
-                     sizeof(netplay_room_list[i].subsystem_name));
+                     sizeof(net_st->room_list[i].subsystem_name));
 
-               netplay_room_list[i].port      = host->port;
-               netplay_room_list[i].gamecrc   = host->content_crc;
-               netplay_room_list[i].timestamp = 0;
-               netplay_room_list[i].lan       = true;
+               net_st->room_list[i].port      = host->port;
+               net_st->room_list[i].gamecrc   = host->content_crc;
+               net_st->room_list[i].timestamp = 0;
+               net_st->room_list[i].lan       = true;
 
                snprintf(s, sizeof(s),
                      msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NETPLAY_ROOM_NICKNAME),
-                     netplay_room_list[i].nickname);
+                     net_st->room_list[i].nickname);
             }
-            netplay_room_count += lan_room_count;
+            net_st->room_count += lan_room_count;
          }
 
          menu_entries_ctl(MENU_ENTRIES_CTL_SET_REFRESH, &refresh);
@@ -6215,7 +6216,7 @@ int action_cb_push_dropdown_item_resolution(const char *path,
       float num            = refreshrate / 60.0f;
       unsigned refresh_mod = num > 0 ? (unsigned)(floorf(num + 0.5f)) : (unsigned)(ceilf(num - 0.5f));
 #else
-      unsigned refresh_mod = lroundf(refreshrate / 60.0f);
+      unsigned refresh_mod = lroundf((float)(refreshrate / 60.0f));
 #endif
       float refresh_exact  = refreshrate;
 
