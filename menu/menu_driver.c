@@ -72,7 +72,7 @@
 #include <switch.h>
 #endif
 
-#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX)
+#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX) || defined(HAVE_NIRCADA)
 #include "../switch_performance_profiles.h"
 #endif
 
@@ -6704,7 +6704,7 @@ void menu_driver_toggle(
 
    if (on) 
    {
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_MENU);
 #endif
 #ifdef HAVE_OVERLAY
@@ -6725,7 +6725,7 @@ void menu_driver_toggle(
    }
    else
    {
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_CORE);
 #endif
 #ifdef HAVE_OVERLAY

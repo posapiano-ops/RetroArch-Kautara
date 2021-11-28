@@ -319,7 +319,12 @@ frontend_ctx_driver_t frontend_ctx_wiiu =
    NULL,                         /* destroy_signal_handler_state   */
    NULL,                         /* attach_console                 */
    NULL,                         /* detach_console                 */
+#ifdef HAVE_LAKKA
    NULL,                         /* get_lakka_version              */
+#else
+   NULL,                         /* get_nircada_version              */
+#endif
+   NULL,                         /* get_nircada_version              */
    NULL,                         /* set_screen_brightness          */
    NULL,                         /* watch_path_for_changes         */
    NULL,                         /* check_for_path_changes         */

@@ -344,7 +344,7 @@ command_t* command_stdin_new(void)
 }
 #endif
 
-#if defined(HAVE_LAKKA)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 #include <sys/un.h>
 #define MAX_USER_CONNECTIONS  4
 typedef struct

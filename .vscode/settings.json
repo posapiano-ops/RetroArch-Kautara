@@ -39,4 +39,5 @@
       "xutility": "c"
    },
    "C_Cpp.dimInactiveRegions": false,
+   "cmake.configureOnOpen": true,
 }

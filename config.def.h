@@ -173,7 +173,7 @@
 
 #define DEFAULT_USER_LANGUAGE 0
 
-#if (defined(_WIN32) && !defined(_XBOX)) || (defined(__linux) && !defined(ANDROID) && !defined(HAVE_LAKKA)) || (defined(__MACH__) && !defined(IOS)) || defined(EMSCRIPTEN)
+#if (defined(_WIN32) && !defined(_XBOX)) || (defined(__linux) && !defined(ANDROID) && !defined(HAVE_LAKKA) && !defined(HAVE_NIRCADA)) || (defined(__MACH__) && !defined(IOS)) || defined(EMSCRIPTEN)
 #define DEFAULT_MOUSE_ENABLE true
 #else
 #define DEFAULT_MOUSE_ENABLE false
@@ -736,10 +736,15 @@ static const unsigned xmb_menu_layout       = 2;
 #else
 static const unsigned xmb_menu_layout       = 0;
 #endif
+#if defined(HAVE_NIRCADA)
+static const unsigned xmb_icon_theme        = XMB_ICON_THEME_TOORONTO;
+static const unsigned xmb_theme             = XMB_THEME_DARK;
+#else
 static const unsigned xmb_icon_theme        = XMB_ICON_THEME_MONOCHROME;
 static const unsigned xmb_theme             = XMB_THEME_ELECTRIC_BLUE;
+#endif
 
-#if defined(HAVE_LAKKA) || defined(__arm__) || defined(__PPC64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA) || defined(__arm__) || defined(__PPC64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__)
 #define DEFAULT_XMB_SHADOWS_ENABLE false
 #else
 #define DEFAULT_XMB_SHADOWS_ENABLE true

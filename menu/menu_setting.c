@@ -91,7 +91,10 @@
 #include "../ui/ui_companion_driver.h"
 #include "../performance_counters.h"
 #include "../setting_list.h"
+#ifdef HAVE_LAKKA
 #include "../lakka.h"
+#else
+#include "../nircada.h"
 #include "../retroarch.h"
 #include "../gfx/video_display_server.h"
 #ifdef HAVE_CHEATS
@@ -295,7 +298,11 @@ enum settings_list_type
    SETTINGS_LIST_CHEEVOS,
    SETTINGS_LIST_CORE_UPDATER,
    SETTINGS_LIST_NETPLAY,
+#ifdef HAVE_LAKKA
    SETTINGS_LIST_LAKKA_SERVICES,
+#else
+   SETTINGS_LIST_NIRCADA_SERVICES,
+#endif
    SETTINGS_LIST_USER,
    SETTINGS_LIST_USER_ACCOUNTS,
    SETTINGS_LIST_USER_ACCOUNTS_CHEEVOS,

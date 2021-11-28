@@ -1440,7 +1440,7 @@ static const struct retro_keybind retro_keybinds_1[] = {
       RARCH_CLOSE_CONTENT_KEY, NO_BTN, NO_BTN, 0,
       true
    },
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined (HAVE_NIRCADA)
    {
       NULL, NULL,
       AXIS_NONE, AXIS_NONE, AXIS_NONE,

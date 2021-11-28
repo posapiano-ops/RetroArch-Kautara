@@ -60,8 +60,9 @@
 #endif
 
 #include "lakka.h"
+#include "nircada.h"
 
-#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA) || defined(HAVE_LIBNX)
 #include "switch_performance_profiles.h"
 #endif
 
@@ -312,7 +313,7 @@ const struct input_bind_map input_config_bind_map[RARCH_BIND_LIST_END_NULL] = {
    DECLARE_META_BIND(1, save_state,            RARCH_SAVE_STATE_KEY,         MENU_ENUM_LABEL_VALUE_INPUT_META_SAVE_STATE_KEY),
    DECLARE_META_BIND(2, toggle_fullscreen,     RARCH_FULLSCREEN_TOGGLE_KEY,  MENU_ENUM_LABEL_VALUE_INPUT_META_FULLSCREEN_TOGGLE_KEY),
    DECLARE_META_BIND(2, close_content,         RARCH_CLOSE_CONTENT_KEY,      MENU_ENUM_LABEL_VALUE_INPUT_META_CLOSE_CONTENT_KEY),
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    DECLARE_META_BIND(2, exit_emulator,         RARCH_QUIT_KEY,               MENU_ENUM_LABEL_VALUE_INPUT_META_RESTART_KEY),
 #else
    DECLARE_META_BIND(2, exit_emulator,         RARCH_QUIT_KEY,               MENU_ENUM_LABEL_VALUE_INPUT_META_QUIT_KEY),
@@ -644,7 +645,7 @@ static const enum bluetooth_driver_enum BLUETOOTH_DEFAULT_DRIVER = BLUETOOTH_BLU
 static const enum bluetooth_driver_enum BLUETOOTH_DEFAULT_DRIVER = BLUETOOTH_NULL;
 #endif
 
-#if defined(HAVE_LAKKA)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 static const enum wifi_driver_enum WIFI_DEFAULT_DRIVER = WIFI_CONNMANCTL;
 #else
 static const enum wifi_driver_enum WIFI_DEFAULT_DRIVER = WIFI_NULL;
@@ -1362,6 +1363,47 @@ static void load_timezone(char *setting)
 }
 #endif
 
+#ifdef HAVE_NIRCADA
+void config_set_timezone(char *timezone)
+{
+   setenv("TZ", timezone, 1);
+   tzset();
+}
+
+const char *config_get_all_timezones(void)
+{
+   return char_list_new_special(STRING_LIST_TIMEZONES, NULL);
+}
+
+static void load_timezone(char *setting)
+{
+   char haystack[TIMEZONE_LENGTH+32];
+   static char *needle = "TIMEZONE=";
+   size_t needle_len = strlen(needle);
+
+   RFILE *tzfp = filestream_open(NIRCADA_TIMEZONE_PATH,
+                       RETRO_VFS_FILE_ACCESS_READ,
+                       RETRO_VFS_FILE_ACCESS_HINT_NONE);
+
+   if (tzfp != NULL)
+   {
+      filestream_gets(tzfp, haystack, sizeof(haystack)-1);
+      filestream_close(tzfp);
+
+      char *start = strstr(haystack, needle);
+
+      if (start != NULL)
+         snprintf(setting, TIMEZONE_LENGTH, "%s", start + needle_len);
+      else
+         snprintf(setting, TIMEZONE_LENGTH, "%s", DEFAULT_TIMEZONE);
+   }
+   else
+      snprintf(setting, TIMEZONE_LENGTH, "%s", DEFAULT_TIMEZONE);
+
+   config_set_timezone(setting);
+}
+#endif
+
 bool config_overlay_enable_default(void)
 {
    if (g_defaults.overlay_set)
@@ -1415,7 +1457,7 @@ static struct config_array_setting *populate_settings_array(settings_t *settings
    SETTING_ARRAY("discord_app_id",           settings->arrays.discord_app_id, true, DEFAULT_DISCORD_APP_ID, true);
    SETTING_ARRAY("ai_service_url",           settings->arrays.ai_service_url, true, DEFAULT_AI_SERVICE_URL, true);
    SETTING_ARRAY("crt_switch_timings",       settings->arrays.crt_switch_timings, false, NULL, true);
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    SETTING_ARRAY("cpu_main_gov",             settings->arrays.cpu_main_gov, false, NULL, true);
    SETTING_ARRAY("cpu_menu_gov",             settings->arrays.cpu_menu_gov, false, NULL, true);
 #endif
@@ -2280,7 +2322,7 @@ static struct config_uint_setting *populate_settings_uint(
 
    SETTING_UINT("video_black_frame_insertion",   &settings->uints.video_black_frame_insertion, true, DEFAULT_BLACK_FRAME_INSERTION, false);
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    SETTING_UINT("cpu_scaling_mode",            &settings->uints.cpu_scaling_mode,    true,   0, false);
    SETTING_UINT("cpu_min_freq",                &settings->uints.cpu_min_freq,        true,   1, false);
    SETTING_UINT("cpu_max_freq",                &settings->uints.cpu_max_freq,        true, ~0U, false);
@@ -2567,6 +2609,17 @@ void config_set_defaults(void *data)
          settings->bools.samba_enable, filestream_exists(LAKKA_SAMBA_PATH));
    configuration_set_bool(settings,
          settings->bools.bluetooth_enable, filestream_exists(LAKKA_BLUETOOTH_PATH));
+   configuration_set_bool(settings, settings->bools.localap_enable, false);
+   load_timezone(settings->arrays.timezone);
+#endif
+
+#ifdef HAVE_NIRCADA
+   configuration_set_bool(settings,
+         settings->bools.ssh_enable, filestream_exists(NIRCADA_SSH_PATH));
+   configuration_set_bool(settings,
+         settings->bools.samba_enable, filestream_exists(NIRCADA_SAMBA_PATH));
+   configuration_set_bool(settings,
+         settings->bools.bluetooth_enable, filestream_exists(NIRCADA_BLUETOOTH_PATH));
    configuration_set_bool(settings, settings->bools.localap_enable, false);
    load_timezone(settings->arrays.timezone);
 #endif
@@ -3650,6 +3703,15 @@ static bool config_load_file(global_t *global,
          settings->bools.bluetooth_enable, filestream_exists(LAKKA_BLUETOOTH_PATH));
 #endif
 
+#ifdef HAVE_NIRCADA
+   configuration_set_bool(settings,
+         settings->bools.ssh_enable, filestream_exists(NIRCADA_SSH_PATH));
+   configuration_set_bool(settings,
+         settings->bools.samba_enable, filestream_exists(NIRCADA_SAMBA_PATH));
+   configuration_set_bool(settings,
+         settings->bools.bluetooth_enable, filestream_exists(NIRCADA_BLUETOOTH_PATH));
+#endif
+
    if (!retroarch_override_setting_is_set(RARCH_OVERRIDE_SETTING_SAVE_PATH, NULL) &&
          config_get_path(conf, "savefile_directory", tmp_str, sizeof(tmp_str)))
    {
@@ -4698,6 +4760,27 @@ bool config_save_file(const char *path)
                RETRO_VFS_FILE_ACCESS_HINT_NONE));
    else
       filestream_delete(LAKKA_BLUETOOTH_PATH);
+#endif
+
+#ifdef HAVE_NIRCADA
+   if (settings->bools.ssh_enable)
+      filestream_close(filestream_open(NIRCADA_SSH_PATH,
+               RETRO_VFS_FILE_ACCESS_WRITE,
+               RETRO_VFS_FILE_ACCESS_HINT_NONE));
+   else
+      filestream_delete(NIRCADA_SSH_PATH);
+   if (settings->bools.samba_enable)
+      filestream_close(filestream_open(NIRCADA_SAMBA_PATH,
+               RETRO_VFS_FILE_ACCESS_WRITE,
+               RETRO_VFS_FILE_ACCESS_HINT_NONE));
+   else
+      filestream_delete(NIRCADA_SAMBA_PATH);
+   if (settings->bools.bluetooth_enable)
+      filestream_close(filestream_open(NIRCADA_BLUETOOTH_PATH,
+               RETRO_VFS_FILE_ACCESS_WRITE,
+               RETRO_VFS_FILE_ACCESS_HINT_NONE));
+   else
+      filestream_delete(NIRCADA_BLUETOOTH_PATH);
 #endif
 
    for (i = 0; i < MAX_USERS; i++)
