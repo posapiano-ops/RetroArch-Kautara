@@ -678,7 +678,7 @@ static int manual_content_scan_core_name_left(unsigned type, const char *label,
    return 0;
 }
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 static int cpu_policy_mode_change(unsigned type, const char *label,
       bool wraparound)
 {
@@ -1095,7 +1095,7 @@ static int menu_cbs_init_bind_left_compare_label(menu_file_list_cbs_t *cbs,
                BIND_ACTION_LEFT(cbs, manual_content_scan_core_name_left);
                break;
             #ifndef HAVE_LAKKA_SWITCH
-            #ifdef HAVE_LAKKA
+            #if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
             case MENU_ENUM_LABEL_CPU_PERF_MODE:
                BIND_ACTION_LEFT(cbs, cpu_policy_mode_change);
                break;

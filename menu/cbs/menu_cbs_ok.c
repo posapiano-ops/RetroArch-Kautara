@@ -74,7 +74,11 @@
 #include "../../playlist.h"
 #include "../../retroarch.h"
 #include "../../verbosity.h"
+#ifdef HAVE_LAKKA
 #include "../../lakka.h"
+#elif defined(HAVE_NIRCADA)
+#include "../../nircada.h"
+#endif
 #include "../../bluetooth/bluetooth_driver.h"
 #include "../../gfx/video_display_server.h"
 #include "../../manual_content_scan.h"
@@ -95,7 +99,7 @@
 #include "../../play_feature_delivery/play_feature_delivery.h"
 #endif
 
-#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX)
+#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX) || defined(HAVE_NIRCADA)
 #include "../../switch_performance_profiles.h"
 #endif
 
@@ -247,6 +251,23 @@ static char *lakka_get_project(void)
 
    pclose(command_file);
    return lakka_project;
+}
+#endif
+#ifdef HAVE_NIRCADA
+static char *nircada_get_project(void)
+{
+   size_t len;
+   static char nircada_project[128];
+   FILE *command_file = popen("cat /etc/release | cut -d - -f 1", "r");
+
+   fgets(nircada_project, sizeof(nircada_project), command_file);
+   len = strlen(nircada_project);
+
+   if (len > 0 && nircada_project[len-1] == '\n')
+      nircada_project[--len] = '\0';
+
+   pclose(command_file);
+   return nircada_project;
 }
 #endif
 #endif
