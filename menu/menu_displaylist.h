@@ -106,7 +106,7 @@ enum menu_displaylist_ctl_state
    DISPLAYLIST_PL_THUMBNAILS_UPDATER,
 #ifdef HAVE_LAKKA
    DISPLAYLIST_LAKKA,
-#else
+#elif defined(HAVE_NIRCADA)
    DISPLAYLIST_NIRCADA,
 #endif
    DISPLAYLIST_CORES_DETECTED,
