@@ -8503,6 +8503,10 @@ MSG_HASH(
    "Пользовательский"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_TOORONTO,
+   "Торонто"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_MONOCHROME,
    "Монохромный"
    )

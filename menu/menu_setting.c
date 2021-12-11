@@ -4245,6 +4245,10 @@ static void setting_get_string_representation_uint_xmb_icon_theme(
 
    switch (*setting->value.target.unsigned_integer)
    {
+      case XMB_ICON_THEME_TOORONTO:
+         strlcpy(s,
+               msg_hash_to_str(MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_TOORONTO), len);
+         break;
       case XMB_ICON_THEME_MONOCHROME:
          strlcpy(s,
                msg_hash_to_str(MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_MONOCHROME), len);

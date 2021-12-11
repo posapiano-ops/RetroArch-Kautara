@@ -6147,6 +6147,10 @@ MSG_HASH(
    "واجهة مستخدم مسطحة"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_TOORONTO,
+   "أتورنتو"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_MONOCHROME,
    "أحادي اللون"
    )

@@ -259,6 +259,7 @@ enum xmb_color_theme
 
 enum xmb_icon_theme
 {
+   XMB_ICON_THEME_TOORONTO,
    XMB_ICON_THEME_MONOCHROME = 0,
    XMB_ICON_THEME_FLATUI,
    XMB_ICON_THEME_RETROACTIVE,
