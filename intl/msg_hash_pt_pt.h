@@ -5093,6 +5093,10 @@ MSG_HASH(
    "Atualizar Lakka"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "Atualizar NircadaOS"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
    "Nome da interface visual"
    )
@@ -5164,13 +5168,17 @@ MSG_HASH(
 #endif
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
    "Ativar Bluetooth"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Serviços"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Serviços"
    )
 MSG_HASH(

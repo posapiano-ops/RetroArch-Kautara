@@ -11565,12 +11565,20 @@ MSG_HASH(
    "Actualizar Lakka"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "Actualizar NircadaOS"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
    "Nombre del front-end"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "Versión de Lakka"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "Versión de NircadaOS"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
@@ -11908,7 +11916,7 @@ MSG_HASH(
    "Acelera la CPU de Switch."
    )
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
    "Activar Bluetooth"
@@ -11919,6 +11927,10 @@ MSG_HASH(
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Servicios"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Servicios"
    )
 MSG_HASH(

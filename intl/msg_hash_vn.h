@@ -1621,6 +1621,10 @@ MSG_HASH(
    "Cập nhật Lakka"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "Cập nhật NircadaOS"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
    "Khởi động lại"
    )
@@ -1656,7 +1660,7 @@ MSG_HASH(
 #endif
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
    "Kích hoạt Bluetooth"

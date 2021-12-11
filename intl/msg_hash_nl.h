@@ -4517,6 +4517,10 @@ MSG_HASH(
    "Lakka versie"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "NircadaOS versie"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
    "Herstart"
    )
@@ -4564,7 +4568,7 @@ MSG_HASH(
 #endif
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
    "Bluetooth Activeren"

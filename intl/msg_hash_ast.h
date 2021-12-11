@@ -3113,6 +3113,13 @@ MSG_HASH(
    "Versión de Lakka"
    )
 
+/* Nircada */
+
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "Versión de NircadaOS"
+   )
+
 /* Environment Specific Settings */
 
 MSG_HASH(
@@ -3144,9 +3151,13 @@ MSG_HASH(
 #endif
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Servicios"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Servicios"
    )
 MSG_HASH(

@@ -11649,12 +11649,20 @@ MSG_HASH(
    "Päivitä Lakka"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "Päivitä NircadaOS"
+   )
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
    "Edustan nimi"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "Lakka-versio"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "Nircada-versioOS"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
@@ -12000,13 +12008,17 @@ MSG_HASH(
    "Ylikellota Switchin prosessori."
    )
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
    "Määritä bluetoothin tila."
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Palvelut"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Palvelut"
    )
 MSG_HASH(

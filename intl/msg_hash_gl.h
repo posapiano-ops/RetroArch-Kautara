@@ -1816,7 +1816,7 @@ MSG_HASH(
 #endif
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
    "Compartir cartafoles na rede empregando o protocolo SMB."

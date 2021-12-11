@@ -9048,6 +9048,14 @@ MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "تحديث Lakka"
    )
+
+/* Nircada */
+
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "تحديث NircadaOS"
+   )
+
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
    "اسم الواجهة"
@@ -9056,6 +9064,14 @@ MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "إصدار Lakka"
    )
+
+/* Nircada */
+
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "إصدار NircadaOS"
+   )
+
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
    "إعادة تشغيل"
@@ -9180,13 +9196,17 @@ MSG_HASH(
    "تبديل وحدة المعالجة المركزية."
    )
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
    "البلوتوث"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "الخدمات"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "الخدمات"
    )
 MSG_HASH(

@@ -2860,7 +2860,7 @@ MSG_HASH(
    "Pretaktovanie CPU Switcha."
    )
 #endif
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 #endif
 #ifdef GEKKO
 #endif
