@@ -2670,7 +2670,11 @@ static uintptr_t xmb_icon_get_id(xmb_handle_t *xmb,
       case MENU_ENUM_LABEL_ONLINE_UPDATER:
       case MENU_ENUM_LABEL_UPDATER_SETTINGS:
          return xmb->textures.list[XMB_TEXTURE_UPDATER];
+#ifdef HAVE_LAKKA
       case MENU_ENUM_LABEL_UPDATE_LAKKA:
+#else
+      case MENU_ENUM_LABEL_UPDATE_NIRCADA:
+#endif
          return xmb->textures.list[XMB_TEXTURE_MAIN_MENU];
       case MENU_ENUM_LABEL_UPDATE_CHEATS:
          return xmb->textures.list[XMB_TEXTURE_CHEAT_OPTIONS];
@@ -5946,6 +5950,8 @@ static const char *xmb_texture_path(unsigned id)
       case XMB_TEXTURE_MAIN_MENU:
 #if defined(HAVE_LAKKA)
          return "lakka.png";
+#elif defined(HAVE_NIRCADA)
+         return "nircada.png";
 #else
          return "retroarch.png";
 #endif

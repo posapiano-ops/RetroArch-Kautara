@@ -638,6 +638,8 @@ DEFAULT_TITLE_MACRO(action_get_network_settings_list,           MENU_ENUM_LABEL_
 DEFAULT_TITLE_MACRO(action_get_netplay_lan_scan_settings_list,  MENU_ENUM_LABEL_VALUE_NETPLAY_LAN_SCAN_SETTINGS)
 #ifdef HAVE_LAKKA
 DEFAULT_TITLE_MACRO(action_get_lakka_services_list,             MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES)
+#elif defined(HAVE_NIRCADA)
+DEFAULT_TITLE_MACRO(action_get_nircada_services_list,             MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES)
 #endif
 DEFAULT_TITLE_MACRO(action_get_user_settings_list,              MENU_ENUM_LABEL_VALUE_USER_SETTINGS)
 DEFAULT_TITLE_MACRO(action_get_directory_settings_list,         MENU_ENUM_LABEL_VALUE_DIRECTORY_SETTINGS)
@@ -969,6 +971,8 @@ static int menu_cbs_init_bind_title_compare_label(menu_file_list_cbs_t *cbs,
       {MENU_ENUM_LABEL_DEFERRED_NETPLAY_LAN_SCAN_SETTINGS_LIST,       action_get_netplay_lan_scan_settings_list},
 #ifdef HAVE_LAKKA
       {MENU_ENUM_LABEL_DEFERRED_LAKKA_SERVICES_LIST,                  action_get_lakka_services_list},
+#elif defined(HAVE_NIRCADA)
+      {MENU_ENUM_LABEL_DEFERRED_NIRCADA_SERVICES_LIST,                  action_get_nircada_services_list},
 #endif
       {MENU_ENUM_LABEL_DEFERRED_USER_SETTINGS_LIST,                   action_get_user_settings_list},
       {MENU_ENUM_LABEL_DEFERRED_DIRECTORY_SETTINGS_LIST,              action_get_directory_settings_list},

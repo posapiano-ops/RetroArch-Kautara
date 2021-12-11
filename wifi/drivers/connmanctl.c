@@ -24,7 +24,10 @@
 #include <time.h>
 #include "../wifi_driver.h"
 #include "../../retroarch.h"
+#ifdef HAVE_LAKKA
 #include "../../lakka.h"
+#else
+#include "../../nircada.h"
 #ifdef HAVE_GFX_WIDGETS
 #include "../../gfx/gfx_widgets.h"
 #endif
@@ -329,7 +332,11 @@ static bool connmanctl_connect_ssid(
    bool widgets_active                 = connman->connmanctl_widgets_supported;
 #endif
    strlcat(netid, netinfo->netid, sizeof(netid));
+#ifdef HAVE_LAKKA
    strlcat(settings_dir, LAKKA_CONNMAN_DIR, sizeof(settings_dir));
+#else
+   strlcat(settings_dir, NIRCADA_CONNMAN_DIR, sizeof(settings_dir));
+#endif
    strlcat(settings_dir, netid, sizeof(settings_dir));
 
    path_mkdir(settings_dir);
@@ -489,7 +496,11 @@ static void connmanctl_get_connected_servicename(
                basename $serv ; \
             fi ; \
          done",
+#ifdef HAVE_LAKKA
          LAKKA_CONNMAN_DIR);
+#else
+         NIRCADA_CONNMAN_DIR);
+#endif
 
    command_file = popen(connman->command, "r");
 
@@ -607,8 +618,11 @@ static void connmanctl_tether_start_stop(void *data, bool start, char* configfil
 
          RARCH_LOG("[CONNMANCTL] Tether start stop: creating new config \"%s\"\n",
                configfile);
-
+#ifdef HAVE_LAKKA
          snprintf(apname, sizeof(apname), "LakkaAccessPoint");
+#else
+         snprintf(apname, sizeof(apname), "NircadaAccessPoint");
+#endif
          snprintf(passkey, sizeof(passkey), "RetroArch");
 
          fprintf(command_file, "APNAME=%s\nPASSWORD=%s", apname, passkey);

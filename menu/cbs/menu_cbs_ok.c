@@ -430,8 +430,13 @@ static enum msg_hash_enums action_ok_dl_to_enum(unsigned lbl)
          return MENU_ENUM_LABEL_DEFERRED_NETPLAY;
       case ACTION_OK_DL_NETPLAY_LAN_SCAN_SETTINGS_LIST:
          return MENU_ENUM_LABEL_DEFERRED_NETPLAY_LAN_SCAN_SETTINGS_LIST;
+#ifdef HAVE_LAKKA
       case ACTION_OK_DL_LAKKA_SERVICES_LIST:
          return MENU_ENUM_LABEL_DEFERRED_LAKKA_SERVICES_LIST;
+#elif defined(HAVE_NIRCADA)
+      case ACTION_OK_DL_NIRCADA_SERVICES_LIST:
+         return MENU_ENUM_LABEL_DEFERRED_NIRCADA_SERVICES_LIST;
+#endif
       case ACTION_OK_DL_USER_SETTINGS_LIST:
          return MENU_ENUM_LABEL_DEFERRED_USER_SETTINGS_LIST;
       case ACTION_OK_DL_DIRECTORY_SETTINGS_LIST:
@@ -1382,6 +1387,7 @@ int generic_action_ok_displaylist_push(const char *path,
          info.enum_idx      = MENU_ENUM_LABEL_DEFERRED_CORE_CONTENT_LIST;
          dl_type            = DISPLAYLIST_PENDING_CLEAR;
          break;
+#ifdef HAVE_LAKKA
       case ACTION_OK_DL_LAKKA_LIST:
          info.type          = type;
          info.directory_ptr = idx;
@@ -1390,7 +1396,16 @@ int generic_action_ok_displaylist_push(const char *path,
          info.enum_idx      = MENU_ENUM_LABEL_DEFERRED_LAKKA_LIST;
          dl_type            = DISPLAYLIST_PENDING_CLEAR;
          break;
-
+#elif defined(HAVE_NIRCADA)
+      case ACTION_OK_DL_NIRCADA_LIST:
+         info.type          = type;
+         info.directory_ptr = idx;
+         info_path          = path;
+         info_label         = msg_hash_to_str(MENU_ENUM_LABEL_DEFERRED_NIRCADA_LIST);
+         info.enum_idx      = MENU_ENUM_LABEL_DEFERRED_NIRCADA_LIST;
+         dl_type            = DISPLAYLIST_PENDING_CLEAR;
+         break;
+#endif
       case ACTION_OK_DL_CORE_CONTENT_DIRS_SUBDIR_LIST:
          fill_pathname_join_delim(tmp, path, label, ';',
                sizeof(tmp));
@@ -1524,7 +1539,11 @@ int generic_action_ok_displaylist_push(const char *path,
       case ACTION_OK_DL_WIFI_NETWORKS_LIST:
       case ACTION_OK_DL_NETPLAY:
       case ACTION_OK_DL_NETPLAY_LAN_SCAN_SETTINGS_LIST:
+#ifdef HAVE_LAKKA
       case ACTION_OK_DL_LAKKA_SERVICES_LIST:
+#elif defined(HAVE_NIRCADA)
+      case ACTION_OK_DL_NIRCADA_SERVICES_LIST:
+#endif
       case ACTION_OK_DL_USER_SETTINGS_LIST:
       case ACTION_OK_DL_DIRECTORY_SETTINGS_LIST:
       case ACTION_OK_DL_PRIVACY_SETTINGS_LIST:
@@ -4584,6 +4603,19 @@ static int generic_action_ok_network(const char *path,
          type_id2     = ACTION_OK_DL_LAKKA_LIST;
          callback     = cb_net_generic;
          break;
+#elif defined(HAVE_NIRCADA)
+      case MENU_ENUM_LABEL_CB_NIRCADA_LIST:
+         /* TODO unhardcode this path */
+         fill_pathname_join(url_path,
+               FILE_PATH_NIRCADA_URL,
+               nircada_get_project(), sizeof(url_path));
+         fill_pathname_join(url_path, url_path,
+               FILE_PATH_INDEX_URL,
+               sizeof(url_path));
+         url_label    = msg_hash_to_str(enum_idx);
+         type_id2     = ACTION_OK_DL_NIRCADA_LIST;
+         callback     = cb_net_generic;
+         break;
 #endif
       default:
          break;
@@ -4606,8 +4638,11 @@ static int generic_action_ok_network(const char *path,
 DEFAULT_ACTION_OK_LIST(action_ok_core_content_list, MENU_ENUM_LABEL_CB_CORE_CONTENT_LIST)
 DEFAULT_ACTION_OK_LIST(action_ok_core_content_dirs_list, MENU_ENUM_LABEL_CB_CORE_CONTENT_DIRS_LIST)
 DEFAULT_ACTION_OK_LIST(action_ok_thumbnails_updater_list, MENU_ENUM_LABEL_CB_THUMBNAILS_UPDATER_LIST)
+#ifdef HAVE_LAKKA
 DEFAULT_ACTION_OK_LIST(action_ok_lakka_list, MENU_ENUM_LABEL_CB_LAKKA_LIST)
-
+#elif defined(HAVE_NIRCADA)
+DEFAULT_ACTION_OK_LIST(action_ok_nircada_list, MENU_ENUM_LABEL_CB_NIRCADA_LIST)
+#endif
 static void cb_generic_dir_download(retro_task_t *task,
       void *task_data,
       void *user_data, const char *err)
@@ -4708,9 +4743,15 @@ void cb_generic_download(retro_task_t *task,
          }
 #endif
          break;
+#ifdef HAVE_LAKKA
       case MENU_ENUM_LABEL_CB_LAKKA_DOWNLOAD:
          dir_path = LAKKA_UPDATE_DIR;
          break;
+#elif defined(HAVE_NIRCADA)
+      case MENU_ENUM_LABEL_CB_NIRCADA_DOWNLOAD:
+         dir_path = NIRCADA_UPDATE_DIR;
+         break;
+#endif
       case MENU_ENUM_LABEL_CB_DISCORD_AVATAR:
          fill_pathname_application_special(buf, sizeof(buf),
                APPLICATION_SPECIAL_DIRECTORY_THUMBNAILS_DISCORD_AVATARS);
@@ -4841,11 +4882,18 @@ static int action_ok_download_generic(const char *path,
             string_list_deinitialize(&str_list);
          }
          break;
+#ifdef HAVE_LAKKA
       case MENU_ENUM_LABEL_CB_LAKKA_DOWNLOAD:
 #ifdef HAVE_LAKKA
          /* TODO unhardcode this path*/
          fill_pathname_join(s, FILE_PATH_LAKKA_URL,
                lakka_get_project(), sizeof(s));
+#endif
+#elif defined(HAVE_NIRCADA)
+      case MENU_ENUM_LABEL_CB_NIRCADA_DOWNLOAD:
+         /* TODO unhardcode this path*/
+         fill_pathname_join(s, FILE_PATH_NIRCADA_URL,
+               nircada_get_project(), sizeof(s));
 #endif
          break;
       case MENU_ENUM_LABEL_CB_UPDATE_ASSETS:
@@ -5027,6 +5075,8 @@ DEFAULT_ACTION_OK_DOWNLOAD(action_ok_thumbnails_updater_download, MENU_ENUM_LABE
 DEFAULT_ACTION_OK_DOWNLOAD(action_ok_download_url, MENU_ENUM_LABEL_CB_DOWNLOAD_URL)
 #ifdef HAVE_LAKKA
 DEFAULT_ACTION_OK_DOWNLOAD(action_ok_lakka_download, MENU_ENUM_LABEL_CB_LAKKA_DOWNLOAD)
+#elif defined(HAVE_NIRCADA)
+DEFAULT_ACTION_OK_DOWNLOAD(action_ok_nircada_download, MENU_ENUM_LABEL_CB_NIRCADA_DOWNLOAD)
 #endif
 DEFAULT_ACTION_OK_DOWNLOAD(action_ok_update_assets, MENU_ENUM_LABEL_CB_UPDATE_ASSETS)
 DEFAULT_ACTION_OK_DOWNLOAD(action_ok_update_core_info_files, MENU_ENUM_LABEL_CB_UPDATE_CORE_INFO_FILES)
@@ -5588,7 +5638,11 @@ DEFAULT_ACTION_OK_FUNC(action_ok_user_interface_list, ACTION_OK_DL_USER_INTERFAC
 DEFAULT_ACTION_OK_FUNC(action_ok_menu_file_browser_list, ACTION_OK_DL_MENU_FILE_BROWSER_SETTINGS_LIST)
 DEFAULT_ACTION_OK_FUNC(action_ok_retro_achievements_list, ACTION_OK_DL_RETRO_ACHIEVEMENTS_SETTINGS_LIST)
 DEFAULT_ACTION_OK_FUNC(action_ok_updater_list, ACTION_OK_DL_UPDATER_SETTINGS_LIST)
+#ifdef HAVE_LAKKA
 DEFAULT_ACTION_OK_FUNC(action_ok_lakka_services, ACTION_OK_DL_LAKKA_SERVICES_LIST)
+#elif defined(HAVE_NIRCADA)
+DEFAULT_ACTION_OK_FUNC(action_ok_nircada_services, ACTION_OK_DL_NIRCADA_SERVICES_LIST)
+#endif
 DEFAULT_ACTION_OK_FUNC(action_ok_user_list, ACTION_OK_DL_USER_SETTINGS_LIST)
 DEFAULT_ACTION_OK_FUNC(action_ok_netplay_sublist, ACTION_OK_DL_NETPLAY)
 DEFAULT_ACTION_OK_FUNC(action_ok_directory_list, ACTION_OK_DL_DIRECTORY_SETTINGS_LIST)
@@ -7738,7 +7792,11 @@ static int menu_cbs_init_bind_ok_compare_label(menu_file_list_cbs_t *cbs,
          {MENU_ENUM_LABEL_THUMBNAILS_UPDATER_LIST,             action_ok_thumbnails_updater_list},
          {MENU_ENUM_LABEL_PL_THUMBNAILS_UPDATER_LIST,          action_ok_pl_thumbnails_updater_list},
          {MENU_ENUM_LABEL_DOWNLOAD_PL_ENTRY_THUMBNAILS,        action_ok_pl_entry_content_thumbnails},
+#ifdef HAVE_LAKKA
          {MENU_ENUM_LABEL_UPDATE_LAKKA,                        action_ok_lakka_list},
+#elif defined(HAVE_NIRCADA)
+         {MENU_ENUM_LABEL_UPDATE_NIRCADA,                        action_ok_nircada_list},
+#endif
          {MENU_ENUM_LABEL_NETPLAY_REFRESH_ROOMS,               action_ok_push_netplay_refresh_rooms},
 #endif
 #ifdef HAVE_VIDEO_LAYOUT
@@ -7974,7 +8032,11 @@ static int menu_cbs_init_bind_ok_compare_label(menu_file_list_cbs_t *cbs,
          {MENU_ENUM_LABEL_NETWORK_HOSTING_SETTINGS,            action_ok_network_hosting_list},
          {MENU_ENUM_LABEL_SUBSYSTEM_SETTINGS,                  action_ok_subsystem_list},
          {MENU_ENUM_LABEL_NETWORK_SETTINGS,                    action_ok_network_list},
+#ifdef HAVE_LAKKA
          {MENU_ENUM_LABEL_LAKKA_SERVICES,                      action_ok_lakka_services},
+#elif defined(HAVE_NIRCADA)
+         {MENU_ENUM_LABEL_NIRCADA_SERVICES,                      action_ok_nircada_services},
+#endif
          {MENU_ENUM_LABEL_NETPLAY_SETTINGS,                    action_ok_netplay_sublist},
          {MENU_ENUM_LABEL_USER_SETTINGS,                       action_ok_user_list},
          {MENU_ENUM_LABEL_DIRECTORY_SETTINGS,                  action_ok_directory_list},
@@ -8405,11 +8467,19 @@ static int menu_cbs_init_bind_ok_compare_type(menu_file_list_cbs_t *cbs,
             BIND_ACTION_OK(cbs, action_ok_thumbnails_updater_download);
 #endif
             break;
+#ifdef HAVE_LAKKA
          case FILE_TYPE_DOWNLOAD_LAKKA:
 #if defined(HAVE_NETWORKING) && defined(HAVE_LAKKA)
             BIND_ACTION_OK(cbs, action_ok_lakka_download);
 #endif
             break;
+#elif defined(HAVE_NIRCADA)
+         case FILE_TYPE_DOWNLOAD_NIRCADA:
+#if defined(HAVE_NETWORKING) && defined(HAVE_NIRCADA)
+            BIND_ACTION_OK(cbs, action_ok_nircada_download);
+#endif
+            break;
+#endif
          case FILE_TYPE_DOWNLOAD_CORE_INFO:
             break;
          case FILE_TYPE_RDB:

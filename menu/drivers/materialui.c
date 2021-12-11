@@ -9309,6 +9309,12 @@ static int materialui_list_push(void *data, void *userdata,
                   MENU_ENUM_LABEL_UPDATE_LAKKA,
                   PARSE_ACTION,
                   false);
+#elif defined(HAVE_NIRCADA)
+            MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(
+                  info->list,
+                  MENU_ENUM_LABEL_UPDATE_NIRCADA,
+                  PARSE_ACTION,
+                  false);
 #else
 #ifdef HAVE_ONLINE_UPDATER
             if (settings->bools.menu_show_online_updater)
@@ -9383,7 +9389,7 @@ static int materialui_list_push(void *data, void *userdata,
                   PARSE_ACTION,
                   false);
 #endif
-#if defined(HAVE_LAKKA)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
             if (settings->bools.menu_show_reboot)
             {
                MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(
@@ -10521,7 +10527,11 @@ static void materialui_list_insert(
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_WIFI_SETTINGS)) ||
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_NETWORK_SETTINGS)) ||
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_NETPLAY_LAN_SCAN_SETTINGS)) ||
+#ifdef HAVE_LAKKA
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_LAKKA_SERVICES)) ||
+#elif defined(HAVE_NIRCADA)
+                  string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_NIRCADA_SERVICES)) ||
+#endif
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_PLAYLIST_SETTINGS)) ||
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_USER_SETTINGS)) ||
                   string_is_equal(label, msg_hash_to_str(MENU_ENUM_LABEL_DIRECTORY_SETTINGS)) ||

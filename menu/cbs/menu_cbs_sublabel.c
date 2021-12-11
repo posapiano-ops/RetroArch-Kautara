@@ -230,7 +230,7 @@ DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_bluetooth_settings_list,       MENU_
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_wifi_settings_list,            MENU_ENUM_SUBLABEL_WIFI_SETTINGS)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_netplay_lan_scan_settings_list,MENU_ENUM_SUBLABEL_NETPLAY_LAN_SCAN_SETTINGS)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_help_list,                     MENU_ENUM_SUBLABEL_HELP_LIST)
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_services_settings_list,        MENU_ENUM_SUBLABEL_SERVICES_SETTINGS)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_ssh_enable,                    MENU_ENUM_SUBLABEL_SSH_ENABLE)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_samba_enable,                  MENU_ENUM_SUBLABEL_SAMBA_ENABLE )
@@ -258,7 +258,7 @@ DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_input_meta_load_state_key,        ME
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_input_meta_save_state_key,        MENU_ENUM_SUBLABEL_INPUT_META_SAVE_STATE_KEY)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_input_meta_fullscreen_toggle_key, MENU_ENUM_SUBLABEL_INPUT_META_FULLSCREEN_TOGGLE_KEY)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_input_meta_close_content_key,     MENU_ENUM_SUBLABEL_INPUT_META_CLOSE_CONTENT_KEY)
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_input_meta_restart_key,           MENU_ENUM_SUBLABEL_INPUT_META_RESTART_KEY)
 #else
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_input_meta_quit_key,              MENU_ENUM_SUBLABEL_INPUT_META_QUIT_KEY)
@@ -416,7 +416,7 @@ DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_content_special,               MENU_
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_load_content_history,          MENU_ENUM_SUBLABEL_LOAD_CONTENT_HISTORY)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_network_information,           MENU_ENUM_SUBLABEL_NETWORK_INFORMATION)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_system_information,            MENU_ENUM_SUBLABEL_SYSTEM_INFORMATION)
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_quit_retroarch,                MENU_ENUM_SUBLABEL_RESTART_RETROARCH)
 #else
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_quit_retroarch,                MENU_ENUM_SUBLABEL_QUIT_RETROARCH)
@@ -807,7 +807,7 @@ DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_menu_show_information,              
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_menu_show_configurations,              MENU_ENUM_SUBLABEL_MENU_SHOW_CONFIGURATIONS)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_menu_show_help,                        MENU_ENUM_SUBLABEL_MENU_SHOW_HELP)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_menu_show_quit_retroarch,              MENU_ENUM_SUBLABEL_MENU_SHOW_QUIT_RETROARCH)
-#ifndef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_menu_show_restart_retroarch,           MENU_ENUM_SUBLABEL_MENU_SHOW_RESTART_RETROARCH)
 #endif
 DEFAULT_SUBLABEL_MACRO(action_bind_sublabel_menu_show_reboot,                      MENU_ENUM_SUBLABEL_MENU_SHOW_REBOOT)
@@ -1045,7 +1045,7 @@ static int action_bind_sublabel_bluetooth_list(
 }
 
 #ifndef HAVE_LAKKA_SWITCH
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 static int action_bind_sublabel_cpu_policy_entry_list(
       file_list_t *list,
       unsigned type, unsigned i,
@@ -1791,7 +1791,7 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
                BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_input_meta_close_content_key);
                return 0;
             case RARCH_QUIT_KEY:
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
                BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_input_meta_restart_key);
 #else
                BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_input_meta_quit_key);
@@ -2472,7 +2472,7 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
          case MENU_ENUM_LABEL_MENU_SHOW_QUIT_RETROARCH:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_menu_show_quit_retroarch);
             break;
-#ifndef HAVE_LAKKA
+#if !defined(HAVE_LAKKA) || !defined(HAVE_NIRCADA)
          case MENU_ENUM_LABEL_MENU_SHOW_RESTART_RETROARCH:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_menu_show_restart_retroarch);
             break;
@@ -4162,6 +4162,33 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_timezone);
             break;
 #ifndef HAVE_LAKKA_SWITCH
+         case MENU_ENUM_LABEL_CPU_POLICY_ENTRY:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_cpu_policy_entry_list);
+            break;
+         case MENU_ENUM_LABEL_CPU_PERF_MODE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_cpu_perf_mode);
+            break;
+#endif
+#elif defined(HAVE_NIRCADA)
+         case MENU_ENUM_LABEL_NIRCADA_SERVICES:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_services_settings_list);
+            break;
+         case MENU_ENUM_LABEL_SSH_ENABLE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_ssh_enable);
+            break;
+         case MENU_ENUM_LABEL_SAMBA_ENABLE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_samba_enable);
+            break;
+         case MENU_ENUM_LABEL_BLUETOOTH_ENABLE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_bluetooth_enable);
+            break;
+         case MENU_ENUM_LABEL_LOCALAP_ENABLE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_localap_enable);
+            break;
+         case MENU_ENUM_LABEL_TIMEZONE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_timezone);
+            break;
+#ifndef HAVE_NIRCADA_SWITCH
          case MENU_ENUM_LABEL_CPU_POLICY_ENTRY:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_cpu_policy_entry_list);
             break;

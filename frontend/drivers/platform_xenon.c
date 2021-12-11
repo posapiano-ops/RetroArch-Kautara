@@ -94,7 +94,7 @@ frontend_ctx_driver_t frontend_ctx_qnx = {
 #ifdef HAVE_LAKKA
    NULL,                         /* get_lakka_version              */
 #else
-   NULL,                         /* get_nircada_version              */
+   NULL,                         /* get_nircada_version            */
 #endif
    NULL,                         /* set_screen_brightness */
    NULL,                         /* watch_path_for_changes */
