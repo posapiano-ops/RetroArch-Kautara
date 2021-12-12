@@ -1615,15 +1615,17 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Cập nhật Lakka"
    )
+#else
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
    "Cập nhật NircadaOS"
    )
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
    "Khởi động lại"

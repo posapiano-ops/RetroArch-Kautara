@@ -28,6 +28,7 @@
 #include "../../lakka.h"
 #else
 #include "../../nircada.h"
+#endif
 #ifdef HAVE_GFX_WIDGETS
 #include "../../gfx/gfx_widgets.h"
 #endif

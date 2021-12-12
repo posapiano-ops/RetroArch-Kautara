@@ -11671,26 +11671,28 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Lakka'yı Güncelle"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
+   "Lakka Sürümü"
+   )
+#else
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
    "NircadaOS'yı Güncelle"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
-   "Kullanıcı arabirimi adı"
-   )
-MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
-   "Lakka Sürümü"
-   )
-MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
    "NircadaOS Sürümü"
+   )
+#endif
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "Kullanıcı arabirimi adı"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
@@ -12033,14 +12035,17 @@ MSG_HASH(
    MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
    "Bluetooth durumunu belirler."
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
    "Hizmetler"
    )
+#else 
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Hizmetler"
    )
+#endif
 MSG_HASH(
    MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
    "İşletim sistemi düzeyinde servisleri yönetin."

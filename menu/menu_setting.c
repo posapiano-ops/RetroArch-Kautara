@@ -4245,10 +4245,6 @@ static void setting_get_string_representation_uint_xmb_icon_theme(
 
    switch (*setting->value.target.unsigned_integer)
    {
-      case XMB_ICON_THEME_TOORONTO:
-         strlcpy(s,
-               msg_hash_to_str(MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_TOORONTO), len);
-         break;
       case XMB_ICON_THEME_MONOCHROME:
          strlcpy(s,
                msg_hash_to_str(MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_MONOCHROME), len);
@@ -4256,6 +4252,10 @@ static void setting_get_string_representation_uint_xmb_icon_theme(
       case XMB_ICON_THEME_FLATUI:
          strlcpy(s,
                msg_hash_to_str(MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_FLATUI), len);
+         break;
+      case XMB_ICON_THEME_TOORONTO:
+         strlcpy(s,
+               msg_hash_to_str(MENU_ENUM_LABEL_VALUE_XMB_ICON_THEME_TOORONTO), len);
          break;
       case XMB_ICON_THEME_RETROACTIVE:
          strlcpy(s,
@@ -20027,9 +20027,9 @@ static bool setting_append_list(
          END_SUB_GROUP(list, list_info, parent_group);
          END_GROUP(list, list_info, parent_group);
          break;
+#if defined(HAVE_LAKKA)
       case SETTINGS_LIST_LAKKA_SERVICES:
          {
-#if defined(HAVE_LAKKA)
             START_GROUP(list, list_info, &group_info,
                   msg_hash_to_str(MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES),
                   parent_group);
@@ -20123,9 +20123,10 @@ static bool setting_append_list(
 
             END_SUB_GROUP(list, list_info, parent_group);
             END_GROUP(list, list_info, parent_group);
-#endif
+
          }
          break;
+#endif
       case SETTINGS_LIST_NIRCADA_SERVICES:
          {
 #if defined(HAVE_NIRCADA)

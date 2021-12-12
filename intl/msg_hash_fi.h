@@ -11647,26 +11647,28 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#if HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Päivitä Lakka"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
+   "Lakka-versio"
+   )
+#else
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
    "Päivitä NircadaOS"
    )
 MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "NircadaOS-versio"
+   )
+#endif
+MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
    "Edustan nimi"
-   )
-MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
-   "Lakka-versio"
-   )
-MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
-   "Nircada-versioOS"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
@@ -12017,14 +12019,17 @@ MSG_HASH(
    MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
    "Määritä bluetoothin tila."
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
    "Palvelut"
    )
+#else
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Palvelut"
    )
+#endif
 MSG_HASH(
    MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
    "Hallinnoi käyttöjärjestelmän tason palveluita."

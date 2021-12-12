@@ -3107,19 +3107,19 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "Versión de Lakka"
    )
-
+#else
 /* Nircada */
 
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
    "Versión de NircadaOS"
    )
-
+#endif
 /* Environment Specific Settings */
 
 MSG_HASH(
@@ -3152,14 +3152,17 @@ MSG_HASH(
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
 #endif
 #if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
    "Servicios"
    )
+#else
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Servicios"
    )
+#endif
 MSG_HASH(
    MENU_ENUM_SUBLABEL_SSH_ENABLE,
    "Usa SSH p'acceder remotamente a la llinia de comandos."

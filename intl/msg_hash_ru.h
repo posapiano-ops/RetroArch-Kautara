@@ -11683,27 +11683,30 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Обновить Lakka"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
-   "Обновить NircadaOS"
-   )
-MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
-   "Название фронтенда"
-   )
-MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "Версия Lakka"
+   )
+#else
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "Обновить NircadaOS"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
    "Версия NircadaOS"
    )
+#endif
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "Название фронтенда"
+   )
+   
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
    "Перезагрузка"
@@ -12057,14 +12060,17 @@ MSG_HASH(
    MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
    "Определяет состояние Bluetooth."
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
    "Сервисы"
    )
+#else
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Сервисы"
    )
+#endif
 MSG_HASH(
    MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
    "Управление службами операционной системы."

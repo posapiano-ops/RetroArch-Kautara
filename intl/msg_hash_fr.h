@@ -11563,29 +11563,30 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Mettre à jour Lakka"
    )
 MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
-   "Mettre à jour NircadaOS"
-   )
-
-MSG_HASH(
-   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
-   "Nom du frontend "
-   )
-MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "Version de Lakka "
+   )
+#else
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "Mettre à jour NircadaOS"
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
    "Version de NircadaOS "
    )
+#endif
 
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "Nom du frontend "
+   )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_REBOOT,
    "Redémarrer"

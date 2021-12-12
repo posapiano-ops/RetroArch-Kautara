@@ -198,7 +198,7 @@ MSG_HASH(
    MENU_ENUM_LABEL_BLOCK_SRAM_OVERWRITE,
    "block_sram_overwrite"
    )
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_BLUETOOTH_ENABLE,
    "bluetooth_enable"
@@ -260,6 +260,7 @@ MSG_HASH(
    MENU_ENUM_LABEL_CB_DOWNLOAD_URL,
    "cb_download_url"
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_CB_LAKKA_DOWNLOAD,
    "cb_lakka_download"
@@ -268,6 +269,16 @@ MSG_HASH(
    MENU_ENUM_LABEL_CB_LAKKA_LIST,
    "cb_lakka_list"
    )
+#else
+MSG_HASH(
+   MENU_ENUM_LABEL_CB_NIRCADA_DOWNLOAD,
+   "cb_nircada_download"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_CB_NIRCADA_LIST,
+   "cb_nircada_list"
+   )
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_CB_MENU_THUMBNAIL,
    "cb_menu_thumbnail"
@@ -916,6 +927,7 @@ MSG_HASH(
    MENU_ENUM_LABEL_DEFERRED_CPU_POLICY_ENTRY,
    "deferred_cpu_policy_list"
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_DEFERRED_LAKKA_LIST,
    "deferred_lakka_list"
@@ -924,6 +936,16 @@ MSG_HASH(
    MENU_ENUM_LABEL_DEFERRED_LAKKA_SERVICES_LIST,
    "deferred_lakka_services_list"
    )
+#else
+MSG_HASH(
+   MENU_ENUM_LABEL_DEFERRED_NIRCADA_LIST,
+   "deferred_nircada_list"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_DEFERRED_NIRCADA_SERVICES_LIST,
+   "deferred_nircada_services_list"
+   )
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_DEFERRED_LOGGING_SETTINGS_LIST,
    "deferred_logging_settings_list"
@@ -1690,10 +1712,17 @@ MSG_HASH(
    MENU_ENUM_LABEL_JOYPAD_DRIVER,
    "input_joypad_driver"
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_LAKKA_SERVICES,
    "lakka_services"
    )
+#else
+MSG_HASH(
+   MENU_ENUM_LABEL_NIRCADA_SERVICES,
+   "nircada_services"
+   )
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_LIBRETRO_DIR_PATH,
    "libretro_dir_path"
@@ -2738,7 +2767,7 @@ MSG_HASH(
    MENU_ENUM_LABEL_RUN_MUSIC,
    "collection_music"
    )
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_SAMBA_ENABLE,
    "samba_enable"
@@ -2932,7 +2961,7 @@ MSG_HASH(
    MENU_ENUM_LABEL_SCREENSHOTS_IN_CONTENT_DIR_ENABLE,
    "screenshots_in_content_dir_enable"
    )
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_SSH_ENABLE,
    "ssh_enable"
@@ -3126,10 +3155,17 @@ MSG_HASH(
    MENU_ENUM_LABEL_UPDATE_GLSL_SHADERS,
    "update_glsl_shaders"
    )
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_UPDATE_LAKKA,
    "update_lakka"
    )
+#else
+MSG_HASH(
+   MENU_ENUM_LABEL_UPDATE_NIRCADA,
+   "update_nircada"
+   )
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_UPDATE_OVERLAYS,
    "update_overlays"
@@ -4968,7 +5004,7 @@ MSG_HASH(
    MENU_ENUM_LABEL_DELETE_PLAYLIST,
    "delete_playlist"
    )
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 MSG_HASH(
    MENU_ENUM_LABEL_LOCALAP_ENABLE,
    "localap_enable"

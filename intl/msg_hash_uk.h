@@ -7189,14 +7189,17 @@ MSG_HASH(
    )
 #endif
 #if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
    "Послуги"
    )
+#else
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Послуги"
    )
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
    "Точка доступу Wi-Fi"

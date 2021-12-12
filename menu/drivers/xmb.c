@@ -638,6 +638,8 @@ const char* xmb_theme_ident(void)
    {
       case XMB_ICON_THEME_FLATUI:
          return "flatui";
+      case XMB_ICON_THEME_TOORONTO:
+         return "tooronto";
       case XMB_ICON_THEME_RETROACTIVE:
          return "retroactive";
       case XMB_ICON_THEME_RETROSYSTEM:
@@ -652,8 +654,6 @@ const char* xmb_theme_ident(void)
          return "dot-art";
       case XMB_ICON_THEME_CUSTOM:
          return "custom";
-      case XMB_ICON_THEME_TOORONTO:
-         return "tooronto";
       case XMB_ICON_THEME_MONOCHROME_INVERTED:
          return "monochrome";
       case XMB_ICON_THEME_AUTOMATIC:
