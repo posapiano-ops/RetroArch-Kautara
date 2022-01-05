@@ -78,7 +78,7 @@ RETRO_BEGIN_DECLS
 #if defined(HAVE_LAKKA_NIGHTLY)
 #define FILE_PATH_LAKKA_URL "http://nightly.builds.lakka.tv/.updater"
 #elif defined(HAVE_NIRCADA)
-#define FILE_PATH_NIRCADA_URL "http://sources.bandanet.org/NircadaOS"
+#define FILE_PATH_NIRCADA_URL "http://sources.bandanet.org/NircadaOS/Kautara"
 #else
 #define FILE_PATH_LAKKA_URL "http://le.builds.lakka.tv"
 #endif
