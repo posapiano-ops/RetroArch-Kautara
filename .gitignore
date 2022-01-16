@@ -227,4 +227,10 @@ param.sfo
 /deps/SPIRV-Cross/out/build/x64-Debug
 
 # Visual Studio Code
-.vscode/
+.vscode/* 
+.vscode/settings.json
+!.vscode/c_cpp_properties.json 
+!.vscode/tasks.json 
+!.vscode/launch.json 
+!.vscode/extensions.json 
+.history.vscode/settings.json
