@@ -15,5 +15,10 @@ to run
 ```
 config file in `${HOME}/.config/retroarch`
 
+## Create patch 
+```
+git diff origin/main nircada > retroarch-100-nircada01.patch
+```
+
 ### Note
 https://docs.libretro.com/development/retroarch/compilation/ubuntu/
