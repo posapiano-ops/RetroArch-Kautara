@@ -6704,8 +6704,10 @@ void menu_driver_toggle(
 
    if (on) 
    {
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_MENU);
+#endif
 #endif
 #ifdef HAVE_OVERLAY
       /* If an overlay was displayed before the toggle
@@ -6725,8 +6727,10 @@ void menu_driver_toggle(
    }
    else
    {
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_CORE);
+#endif
 #endif
 #ifdef HAVE_OVERLAY
       /* Inhibits pointer 'select' and 'cancel' actions

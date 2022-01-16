@@ -398,6 +398,7 @@ static bluetooth_driver_t bluetooth_null = {
    NULL, /* device_is_connected */
    NULL, /* device_get_sublabel */
    NULL, /* connect_device */
+   NULL, /* remove_device */
    "null",
 };
 
@@ -3917,14 +3918,18 @@ static void runloop_pause_checks(void)
       command_event(CMD_EVENT_DISCORD_UPDATE, &userdata);
 #endif
 
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_MENU);
+#endif
 #endif
    }
    else
    {
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_CORE);
+#endif
 #endif
    }
 
@@ -5015,16 +5020,14 @@ bool command_event(enum event_command cmd, void *data)
 #if defined(__linux__) && !defined(ANDROID)
          runloop_msg_queue_push(msg_hash_to_str(MSG_VALUE_SHUTTING_DOWN), 1, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
          command_event(CMD_EVENT_MENU_SAVE_CURRENT_CONFIG, NULL);
-         command_event(CMD_EVENT_QUIT, NULL);
-         system("shutdown -P now");
+         system("(sleep 1 && shutdown -P now) & disown");
 #endif
          break;
       case CMD_EVENT_REBOOT:
 #if defined(__linux__) && !defined(ANDROID)
          runloop_msg_queue_push(msg_hash_to_str(MSG_VALUE_REBOOTING), 1, 180, true, NULL, MESSAGE_QUEUE_ICON_DEFAULT, MESSAGE_QUEUE_CATEGORY_INFO);
          command_event(CMD_EVENT_MENU_SAVE_CURRENT_CONFIG, NULL);
-         command_event(CMD_EVENT_QUIT, NULL);
-         system("shutdown -r now");
+         system("(sleep 1 && shutdown -r now) & disown");
 #endif
          break;
       case CMD_EVENT_RESUME:
@@ -10250,6 +10253,14 @@ bool driver_bluetooth_connect_device(unsigned i)
    return false;
 }
 
+bool driver_bluetooth_remove_device(unsigned i)
+{
+   struct rarch_state       *p_rarch = &rarch_st;
+   if (p_rarch->bluetooth_driver_active)
+      return p_rarch->bluetooth_driver->remove_device(p_rarch->bluetooth_data, i);
+   return false;
+}
+
 bool bluetooth_driver_ctl(enum rarch_bluetooth_ctl_state state, void *data)
 {
    struct rarch_state     *p_rarch  = &rarch_st;
@@ -11128,8 +11139,10 @@ void drivers_init(
    if (flags & DRIVER_MIDI_MASK)
       midi_driver_init(settings);
 
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
    cpu_scaling_driver_init();
+#endif
 #endif
 }
 
@@ -11215,8 +11228,10 @@ void driver_uninit(int flags)
    if (flags & DRIVER_MIDI_MASK)
       midi_driver_free();
 
+#ifndef HAVE_LAKKA_SWITCH
 #ifdef HAVE_LAKKA
    cpu_scaling_driver_free();
+#endif
 #endif
 }
 

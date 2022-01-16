@@ -48,6 +48,8 @@
 
 #include "../../config.def.h"
 
+#include "../../bluetooth/bluetooth_driver.h"
+
 #ifdef HAVE_NETWORKING
 #include "../../core_updater_list.h"
 #endif
@@ -539,6 +541,14 @@ static int action_start_load_core(
    return ret;
 }
 
+static int action_start_bluetooth(const char *path, const char *label,
+         unsigned menu_type, size_t idx, size_t entry_idx)
+{
+   driver_bluetooth_remove_device((unsigned)idx);
+
+   return 0;
+}
+
 #ifdef HAVE_NETWORKING
 static int action_start_core_updater_entry(
       const char *path, const char *label,
@@ -710,6 +720,9 @@ static int menu_cbs_init_bind_start_compare_label(menu_file_list_cbs_t *cbs)
             break;
          case MENU_ENUM_LABEL_MANUAL_CONTENT_SCAN_CORE_NAME:
             BIND_ACTION_START(cbs, action_start_manual_content_scan_core_name);
+            break;
+         case MENU_ENUM_LABEL_CONNECT_BLUETOOTH:
+            BIND_ACTION_START(cbs, action_start_bluetooth);
             break;
          default:
             return -1;
