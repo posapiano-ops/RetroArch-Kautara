@@ -173,7 +173,7 @@
 
 #define DEFAULT_USER_LANGUAGE 0
 
-#if (defined(_WIN32) && !defined(_XBOX)) || (defined(__linux) && !defined(ANDROID) && !defined(HAVE_LAKKA)) || (defined(__MACH__) && !defined(IOS)) || defined(EMSCRIPTEN)
+#if (defined(_WIN32) && !defined(_XBOX)) || (defined(__linux) && !defined(ANDROID) && !defined(HAVE_LAKKA) && !defined(HAVE_NIRCADA)) || (defined(__MACH__) && !defined(IOS)) || defined(EMSCRIPTEN)
 #define DEFAULT_MOUSE_ENABLE true
 #else
 #define DEFAULT_MOUSE_ENABLE false
@@ -646,9 +646,9 @@ static const bool menu_show_load_content       = true;
 #ifdef HAVE_CDROM
 static const bool menu_show_load_disc          = true;
 static const bool menu_show_dump_disc          = true;
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 static const bool menu_show_eject_disc         = true;
-#endif /* HAVE_LAKKA */
+#endif /* HAVE_LAKKA OR NIRCADA*/
 #endif
 static const bool menu_show_information        = true;
 static const bool menu_show_configurations     = true;
@@ -660,7 +660,7 @@ static const bool menu_show_shutdown           = true;
 #if defined(HAVE_LAKKA) || defined(VITA)
 static const bool menu_show_core_updater       = false;
 #else
-static const bool menu_show_core_updater       = true;
+static const bool menu_show_core_updater       = true; /* SHOW CORE update Nircada */
 #endif
 static const bool menu_show_legacy_thumbnail_updater = false;
 static const bool menu_show_sublabels                = true;
@@ -742,7 +742,7 @@ static const unsigned xmb_menu_layout       = 0;
 static const unsigned xmb_icon_theme        = XMB_ICON_THEME_MONOCHROME;
 static const unsigned xmb_theme             = XMB_THEME_ELECTRIC_BLUE;
 
-#if defined(HAVE_LAKKA) || defined(__arm__) || defined(__PPC64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA) || defined(__arm__) || defined(__PPC64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__)
 #define DEFAULT_XMB_SHADOWS_ENABLE false
 #else
 #define DEFAULT_XMB_SHADOWS_ENABLE true
