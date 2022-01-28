@@ -81,7 +81,11 @@ enum setting_flags
    SD_FLAG_CMD_APPLY_AUTO = (1 << 7),
    SD_FLAG_BROWSER_ACTION = (1 << 8),
    SD_FLAG_ADVANCED       = (1 << 9),
+#ifdef HAVE_LAKKA
    SD_FLAG_LAKKA_ADVANCED = (1 << 10)
+#elif defined(HAVE_NIRCADA)
+   SD_FLAG_NIRCADA_ADVANCED = (1 << 10)
+#endif
 };
 
 enum settings_free_flags

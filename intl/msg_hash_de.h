@@ -11231,7 +11231,7 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Lakka aktualisieren"
@@ -11250,7 +11250,26 @@ MSG_HASH(
    )
 
 /* Environment Specific Settings */
+#elif defined(HAVE_NIRCADA)
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "NircadaOS aktualisieren"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "Frontend-Name"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADAA_VERSION,
+   "NircadaOS-Version"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_REBOOT,
+   "Neustart"
+   )
 
+/* Environment Specific Settings */
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_INPUT_SPLIT_JOYCON,
    "Joy-Con teilen"
@@ -11595,6 +11614,92 @@ MSG_HASH(
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Dienste"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
+   "Verwalte Service-Einstellungen deines Betriebssystems."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SAMBA_ENABLE,
+   "SAMBA aktivieren"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "Aktiviere die Netzwerkfreigabe deiner Ordner."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SSH_ENABLE,
+   "SSH aktivieren"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "Aktiviere Fernzugriff auf die Kommandozeile."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "Wi-Fi-Zugangspunkt"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "Wi-Fi Access Point aktivieren oder deaktivieren."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_TIMEZONE,
+   "Zeitzone"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_TIMEZONE,
+   "Zeitzone wählen, um Datum und Zeit an Ihren Standort anzupassen."
+   )
+MSG_HASH(
+   MSG_LOCALAP_SWITCHING_OFF,
+   "Wi-Fi Access Point wird ausgeschaltet."
+   )
+MSG_HASH(
+   MSG_WIFI_DISCONNECT_FROM,
+   "Trenne von Wi-Fi '%s'"
+   )
+MSG_HASH(
+   MSG_WIFI_CONNECTING_TO,
+   "Verbinde mit WLAN '%s'"
+   )
+MSG_HASH(
+   MSG_WIFI_EMPTY_SSID,
+   "[Keine SSID]"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ALREADY_RUNNING,
+   "Wi-Fi Access Point ist bereits gestartet"
+   )
+MSG_HASH(
+   MSG_LOCALAP_NOT_RUNNING,
+   "Wi-Fi Access Point wird nicht ausgeführt"
+   )
+MSG_HASH(
+   MSG_LOCALAP_STARTING,
+   "Starte Wi-Fi Access Point mit SSID=%s und Passwort=%s"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_CREATE,
+   "Konnte die Wi-Fi Access Point Konfigurationsdatei nicht erstellen."
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_PARSE,
+   "Falsche Konfigurationsdatei - APNAME oder PASSWORD in %s nicht gefunden"
+   )
+#endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
+   "Bluetooth aktivieren"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
+   "Aktiviere oder deaktiviere Bluetooth."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Dienste"
    )
 MSG_HASH(

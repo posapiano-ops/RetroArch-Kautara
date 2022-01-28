@@ -75,8 +75,10 @@ RETRO_BEGIN_DECLS
 #define FILE_PATH_LOBBY_LIBRETRO_URL "http://lobby.libretro.com/"
 #define FILE_PATH_CORE_THUMBNAILS_URL "http://thumbnails.libretro.com"
 #define FILE_PATH_CORE_THUMBNAILPACKS_URL "http://thumbnailpacks.libretro.com"
-#ifdef HAVE_LAKKA_NIGHTLY
+#if defined(HAVE_LAKKA_NIGHTLY)
 #define FILE_PATH_LAKKA_URL "http://nightly.builds.lakka.tv/.updater"
+#elif defined(HAVE_NIRCADA) /* todo l'endpoint del repo dipende dalla distro */
+#define FILE_PATH_NIRCADA_URL "http://sources.bandanet.org/NircadaOS/Kautara"
 #else
 #define FILE_PATH_LAKKA_URL "http://le.builds.lakka.tv"
 #endif

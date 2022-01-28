@@ -579,7 +579,7 @@ static wifi_driver_t wifi_null = {
 };
 
 static const wifi_driver_t *wifi_drivers[] = {
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    &wifi_connmanctl,
 #endif
 #ifdef HAVE_WIFI

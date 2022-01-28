@@ -11443,7 +11443,7 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "更新 Lakka"
@@ -11462,7 +11462,26 @@ MSG_HASH(
    )
 
 /* Environment Specific Settings */
+#elif defined(HAVE_NIRCADA)
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "更新 NircadaOS"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "前端名称"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "NircadaOS 版本"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_REBOOT,
+   "重启"
+   )
 
+/* Environment Specific Settings */
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_INPUT_SPLIT_JOYCON,
    "分开 Joy-Con 手柄"
@@ -11791,6 +11810,84 @@ MSG_HASH(
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "服务"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
+   "管理操作系统层级的服务。"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "启用或者禁止网络文件夹共享(SAMBA)。"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "使用 SSH 远程访问命令行。"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "Wi-Fi 接入点"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "启用或禁用 Wi-Fi 接入点。"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_TIMEZONE,
+   "时区"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_TIMEZONE,
+   "选择您的时区以调整日期和时间。"
+   )
+MSG_HASH(
+   MSG_LOCALAP_SWITCHING_OFF,
+   "正在关闭 Wi-Fi 接入点。"
+   )
+MSG_HASH(
+   MSG_WIFI_DISCONNECT_FROM,
+   "正在断开 Wi-Fi “%s”。"
+   )
+MSG_HASH(
+   MSG_WIFI_CONNECTING_TO,
+   "正在连接 Wi-Fi %s"
+   )
+MSG_HASH(
+   MSG_WIFI_EMPTY_SSID,
+   "[无 SSID]"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ALREADY_RUNNING,
+   "Wi-Fi 接入点已经启动"
+   )
+MSG_HASH(
+   MSG_LOCALAP_NOT_RUNNING,
+   "Wi-Fi 接入点没有运行"
+   )
+MSG_HASH(
+   MSG_LOCALAP_STARTING,
+   "启动 Wi-Fi 接入点，SSID=%s，Passkey=%s"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_CREATE,
+   "无法创建 Wi-Fi 接入点配置文件。"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_PARSE,
+   "错误配置文件——在 %s 中找不到 APNAME 或 PASSWORD"
+   )
+#endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
+   "蓝牙"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
+   "开启或关闭蓝牙。"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "服务"
    )
 MSG_HASH(

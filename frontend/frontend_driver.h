@@ -102,7 +102,11 @@ typedef struct frontend_ctx_driver
    void (*destroy_signal_handler_state)(void);
    void (*attach_console)(void);
    void (*detach_console)(void);
+#ifdef HAVE_LAKKA
    void (*get_lakka_version)(char *, size_t);
+#elif defined(HAVE_NIRCADA)
+   void (*get_nircada_version)(char *, size_t);
+#endif
    /* TODO/FIXME: Need to implement some sort of startup brightness setting. */
    void (*set_screen_brightness)(int);
    void (*watch_path_for_changes)(struct string_list *list, int flags, path_change_data_t **change_data);

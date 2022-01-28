@@ -978,6 +978,28 @@ MSG_HASH(
    "Enable or disable remote command line access."
    )
 #endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
+   "Bluetooth Enable"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SAMBA_ENABLE,
+   "SAMBA Enable"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "Enable or disable network sharing of your folders."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SSH_ENABLE,
+   "SSH Enable"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "Enable or disable remote command line access."
+   )
+#endif
 #ifdef GEKKO
 #endif
 #ifdef HAVE_ODROIDGO2

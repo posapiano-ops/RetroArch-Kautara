@@ -11667,7 +11667,7 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Lakka'yı Güncelle"
@@ -11686,7 +11686,26 @@ MSG_HASH(
    )
 
 /* Environment Specific Settings */
+#elif defined(HAVE_NIRCADA)
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "NircadaOS'yı Güncelle"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "Kullanıcı arabirimi adı"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "NircadaOS Sürümü"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_REBOOT,
+   "Yeniden Başlat"
+   )
 
+/* Environment Specific Settings */
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_MENU_WIDGET_SCALE_FACTOR,
    "Grafik Gereçleri Ölçeğini Özelleştir"
@@ -12023,6 +12042,80 @@ MSG_HASH(
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Hizmetler"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
+   "İşletim sistemi düzeyinde servisleri yönetin."
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "Ağ klasörlerini SMB protokolü ile paylaş."
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "Uzaktan komut satırına erişmek için SSH kullanın."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "Wi-Fi Erişim Noktası"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "Wi-Fi Erişim Noktasını etkinleşti veya devre dışı bırak."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_TIMEZONE,
+   "Zaman dilimi"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_TIMEZONE,
+   "Konumunuza göre tarih ve saati ayarlamak için saat dilimini seçin."
+   )
+MSG_HASH(
+   MSG_LOCALAP_SWITCHING_OFF,
+   "Wi-Fi Erişim Noktası Kapatılıyor."
+   )
+MSG_HASH(
+   MSG_WIFI_DISCONNECT_FROM,
+   "Wi-Fi '%s' bağlantısı kesiliyor"
+   )
+MSG_HASH(
+   MSG_WIFI_CONNECTING_TO,
+   "Wi-Fi '%s' ağına bağlanılıyor"
+   )
+MSG_HASH(
+   MSG_WIFI_EMPTY_SSID,
+   "[SSID Yok]"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ALREADY_RUNNING,
+   "Wi-Fi Erişim Noktası zaten başlatıldı"
+   )
+MSG_HASH(
+   MSG_LOCALAP_NOT_RUNNING,
+   "Wi-Fi Erişim Noktası çalışmıyor"
+   )
+MSG_HASH(
+   MSG_LOCALAP_STARTING,
+   "Wi-Fi Erişim Noktası SSID=%s ve Passkey=%s ile başlatılıyor"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_CREATE,
+   "Wi-Fi Erişim Noktası yapılandırma dosyası oluşturulamadı."
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_PARSE,
+   "Yanlış yapılandırma dosyası - %s içinde APNAME veya PASSWORD bulunamadı"
+   )
+#endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
+   "Bluetooth durumunu belirler."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Hizmetler"
    )
 MSG_HASH(

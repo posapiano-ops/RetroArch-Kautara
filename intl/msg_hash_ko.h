@@ -11679,7 +11679,7 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "Lakka 업데이트"
@@ -11698,7 +11698,26 @@ MSG_HASH(
    )
 
 /* Environment Specific Settings */
+#elif defined(HAVE_NIRCADA)
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "NircadaOS 업데이트"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "프론트엔드 이름"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "NircadaOS 버전"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_REBOOT,
+   "재시작"
+   )
 
+/* Environment Specific Settings */
+#endif
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_INPUT_SPLIT_JOYCON,
    "Joy-Con 분할하기"
@@ -12055,6 +12074,92 @@ MSG_HASH(
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "서비스"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
+   "OS 수준 서비스를 관리합니다."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SAMBA_ENABLE,
+   "SAMBA 사용"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "네트워크 폴더 공유를 설정합니다."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SSH_ENABLE,
+   "SSH 사용"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "원격 명령줄의 접근 사용을 설정합니다."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "Wi-Fi 액세스 포인트"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "Wi-Fi 액세스 포인트를 사용합니다."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_TIMEZONE,
+   "시간대"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_TIMEZONE,
+   "시간대를 설정하여 날짜와 시간을 현재 위치에 맞게 조정합니다."
+   )
+MSG_HASH(
+   MSG_LOCALAP_SWITCHING_OFF,
+   "Wi-Fi 액세스 포인트를 종료합니다."
+   )
+MSG_HASH(
+   MSG_WIFI_DISCONNECT_FROM,
+   "Wi-Fi '%s'에서 연결 해제됨"
+   )
+MSG_HASH(
+   MSG_WIFI_CONNECTING_TO,
+   "'%s' Wi-Fi에 연결 중"
+   )
+MSG_HASH(
+   MSG_WIFI_EMPTY_SSID,
+   "[SSID 없음]"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ALREADY_RUNNING,
+   "Wi-Fi 액세스 포인트가 이미 켜져 있습니다"
+   )
+MSG_HASH(
+   MSG_LOCALAP_NOT_RUNNING,
+   "Wi-Fi 액세스 포인트가 꺼져 있습니다"
+   )
+MSG_HASH(
+   MSG_LOCALAP_STARTING,
+   "Wi-Fi 액세스 포인트를 시작합니다. SSID=%s 암호=%s"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_CREATE,
+   "Wi-Fi 액세스 포인트 설정 파일을 만들 수 없습니다."
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_PARSE,
+   "설정 파일이 잘못되었습니다 - %s에서 APNAME 또는 PASSWORD를 찾을 수 없습니다"
+   )
+#endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
+   "블루투스 사용"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_BLUETOOTH_ENABLE,
+   "블루투스를 사용/해제합니다."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "서비스"
    )
 MSG_HASH(

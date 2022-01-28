@@ -37,6 +37,10 @@
 #include "lakka.h"
 #endif
 
+#ifdef HAVE_NIRCADA
+#include "nircada.h"
+#endif
+
 #include "msg_hash.h"
 
 #define configuration_set_float(settings, var, newvar) \
@@ -330,7 +334,7 @@ typedef struct settings
       unsigned video_black_frame_insertion;
       unsigned quit_on_close_content;
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       unsigned cpu_scaling_mode;
       unsigned cpu_min_freq;
       unsigned cpu_max_freq;
@@ -437,7 +441,7 @@ typedef struct settings
       char ai_service_url[PATH_MAX_LENGTH];
 
       char crt_switch_timings[255];
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       char timezone[TIMEZONE_LENGTH];
       char cpu_main_gov[32];
       char cpu_menu_gov[32];
@@ -654,7 +658,7 @@ typedef struct settings
       bool menu_show_load_content;
       bool menu_show_load_disc;
       bool menu_show_dump_disc;
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       bool menu_show_eject_disc;
 #endif
       bool menu_show_information;
@@ -1093,7 +1097,7 @@ void rarch_config_deinit(void);
 
 settings_t *config_get_ptr(void);
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 const char *config_get_all_timezones(void);
 void config_set_timezone(char *timezone);
 #endif

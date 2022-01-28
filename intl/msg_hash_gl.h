@@ -1842,6 +1842,32 @@ MSG_HASH(
    "Desconectando da wifi \"%s\""
    )
 #endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "Compartir cartafoles na rede empregando o protocolo SMB."
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "Empregar SSH para acceder á liña de comandos de forma remota."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "Punto de acceso wifi"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "Activar ou desactivar o punto de acceso wifi."
+   )
+MSG_HASH(
+   MSG_LOCALAP_SWITCHING_OFF,
+   "Apagando o punto de acceso wifi."
+   )
+MSG_HASH(
+   MSG_WIFI_DISCONNECT_FROM,
+   "Desconectando da wifi \"%s\""
+   )
+#endif
 #ifdef GEKKO
 #endif
 #ifdef HAVE_ODROIDGO2

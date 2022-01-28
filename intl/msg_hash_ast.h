@@ -3106,12 +3106,18 @@ MSG_HASH(
    "Hebo un fallu al desbloquiar el nucleu: "
    )
 
-/* Lakka */
-
+/* Lakka && NircadaOS */
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_LAKKA_VERSION,
    "Versión de Lakka"
    )
+#elif defined(HAVE_NIRCADA)
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "Versión de NircadaOS"
+   )
+#endif
 
 /* Environment Specific Settings */
 
@@ -3147,6 +3153,32 @@ MSG_HASH(
 #ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "Servicios"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "Usa SSH p'acceder remotamente a la llinia de comandos."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "Puntu d'accesu Wi-Fi"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "Des/activa'l puntu d'accesu Wi-Fi."
+   )
+MSG_HASH(
+   MSG_LOCALAP_NOT_RUNNING,
+   "El puntu d'accesu Wi-Fi nun ta n'execución"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_CREATE,
+   "Nun se pudo crear el ficheru de configuración del puntu d'accesu Wi-Fi."
+   )
+#endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "Servicios"
    )
 MSG_HASH(

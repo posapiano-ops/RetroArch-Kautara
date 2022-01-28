@@ -107,7 +107,7 @@
 #include <switch.h>
 #endif
 
-#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX)
+#if defined(HAVE_LAKKA) || defined(HAVE_LIBNX) || defined(HAVE_NIRCADA)
 #include "switch_performance_profiles.h"
 #endif
 
@@ -245,6 +245,10 @@
 
 #ifdef HAVE_LAKKA
 #include "lakka.h"
+#endif
+
+#ifdef HAVE_NIRCADA
+#include "nircada.h"
 #endif
 
 #define DRIVERS_CMD_ALL \
@@ -430,7 +434,7 @@ static wifi_driver_t wifi_null = {
 };
 
 static const wifi_driver_t *wifi_drivers[] = {
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    &wifi_connmanctl,
 #endif
 #ifdef HAVE_WIFI
@@ -1194,7 +1198,7 @@ struct string_list *string_list_new_special(enum string_list_type type,
             string_list_append(s, opt, attr);
          }
          break;
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       case STRING_LIST_TIMEZONES:
          {
             const char *opt  = DEFAULT_TIMEZONE;
@@ -3919,7 +3923,7 @@ static void runloop_pause_checks(void)
 #endif
 
 #ifndef HAVE_LAKKA_SWITCH
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_MENU);
 #endif
 #endif
@@ -3927,7 +3931,7 @@ static void runloop_pause_checks(void)
    else
    {
 #ifndef HAVE_LAKKA_SWITCH
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       set_cpu_scaling_signal(CPUSCALING_EVENT_FOCUS_CORE);
 #endif
 #endif
@@ -11140,7 +11144,7 @@ void drivers_init(
       midi_driver_init(settings);
 
 #ifndef HAVE_LAKKA_SWITCH
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    cpu_scaling_driver_init();
 #endif
 #endif
@@ -11229,7 +11233,7 @@ void driver_uninit(int flags)
       midi_driver_free();
 
 #ifndef HAVE_LAKKA_SWITCH
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    cpu_scaling_driver_free();
 #endif
 #endif

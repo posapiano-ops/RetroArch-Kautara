@@ -1156,7 +1156,11 @@ frontend_ctx_driver_t frontend_ctx_win32 = {
    NULL,                            /* destroy_sighandler_state */
    frontend_win32_attach_console,   /* attach_console           */
    frontend_win32_detach_console,   /* detach_console           */
+#ifdef HAVE_LAKKA
    NULL,                            /* get_lakka_version        */
+#elif defined(HAVE_NIRCADA)
+   NULL,                            /* get_nircada_version        */
+#endif
    NULL,                            /* set_screen_brightness    */
    NULL,                            /* watch_path_for_changes   */
    NULL,                            /* check_for_path_changes   */

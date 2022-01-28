@@ -3109,7 +3109,7 @@ void input_driver_init_command(
    }
 #endif
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    input_st->command[2] = command_uds_new();
    if (!input_st->command[2])
       RARCH_ERR("Failed to initialize the UDS command interface.\n");

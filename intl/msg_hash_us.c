@@ -2345,7 +2345,7 @@ int msg_hash_get_help_us_enum(enum msg_hash_enums msg, char *s, size_t len)
             snprintf(s, len,
                      "MIDI driver to use.");
             break;
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
         case MENU_ENUM_LABEL_TIMEZONE:
             snprintf(s, len,
                      "Displays a list of available timezones. After\n"

@@ -1366,7 +1366,47 @@ static void frontend_unix_set_screen_brightness(int value)
    filestream_write_file("/sys/class/backlight/backlight/brightness",
                          svalue, strlen(svalue));
 }
+#elif defined(HAVE_NIRCADA)
+static void frontend_unix_get_nircada_version(char *s,
+      size_t len)
+{
+   char version[128];
+   size_t vlen;
+   FILE *command_file = popen("cat /etc/release", "r");
 
+   fgets(version, sizeof(version), command_file);
+   vlen = strlen(version);
+
+   if (vlen > 0 && version[vlen-1] == '\n')
+      version[--vlen] = '\0';
+
+   strlcpy(s, version, len);
+
+   pclose(command_file);
+}
+
+static void frontend_unix_set_screen_brightness(int value)
+{
+   char *buffer = NULL;
+   char svalue[16] = {0};
+   unsigned int max_brightness = 100;
+
+   /* Device tree should have 'label = "backlight";' if control is desirable */
+   filestream_read_file("/sys/class/backlight/backlight/max_brightness",
+                        &buffer, NULL);
+   if (buffer)
+   {
+      sscanf(buffer, "%u", &max_brightness);
+      free(buffer);
+   }
+
+   /* Calculate the brightness */
+   value = (value * max_brightness) / 100;
+
+   snprintf(svalue, sizeof(svalue), "%d\n", value);
+   filestream_write_file("/sys/class/backlight/backlight/brightness",
+                         svalue, strlen(svalue));
+}
 #endif
 
 static void frontend_unix_get_env(int *argc,
@@ -2001,7 +2041,7 @@ static void frontend_unix_deinit(void *data)
    android_app_destroy(android_app);
 #endif
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    /* Reset brightness to maximum */
    if (settings->uints.screen_brightness != DEFAULT_SCREEN_BRIGHTNESS)
       frontend_unix_set_screen_brightness(DEFAULT_SCREEN_BRIGHTNESS);
@@ -2833,6 +2873,8 @@ frontend_ctx_driver_t frontend_ctx_unix = {
    NULL,                               /* detach_console */
 #ifdef HAVE_LAKKA
    frontend_unix_get_lakka_version,    /* get_lakka_version */
+#elif defined(HAVE_NIRCADA)
+   frontend_unix_get_nircada_version,    /* get_nircada_version */
 #else
    NULL,                               /* get_lakka_version */
 #endif

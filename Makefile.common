@@ -786,6 +786,11 @@ ifeq ($(HAVE_LAKKA), 1)
    OBJ += misc/cpufreq/cpufreq.o
 endif
 
+ifeq ($(HAVE_NIRCADA), 1)
+   OBJ += wifi/drivers/connmanctl.o
+   OBJ += misc/cpufreq/cpufreq.o
+endif
+
 ifeq ($(HAVE_WIFI), 1)
    OBJ += wifi/drivers/nmcli.o
    DEFINES += -DHAVE_WIFI
@@ -1038,6 +1043,10 @@ endif
 
 ifeq ($(HAVE_LAKKA), 1)
    DEFINES += -DHAVE_LAKKA
+endif
+
+ifeq ($(HAVE_NIRCADA), 1)
+   DEFINES += -DHAVE_NIRCADA
 endif
 
 ifeq ($(HAVE_LAKKA_SWITCH), 1)

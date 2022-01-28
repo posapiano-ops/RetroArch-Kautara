@@ -9043,7 +9043,7 @@ MSG_HASH(
    )
 
 /* Lakka */
-
+#ifdef HAVE_LAKKA
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA,
    "تحديث Lakka"
@@ -9062,6 +9062,24 @@ MSG_HASH(
    )
 
 /* Environment Specific Settings */
+#elif defined(HAVE_NIRCADA)
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_UPDATE_NIRCADA,
+   "تحديث NircadaOS"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_FRONTEND_NAME,
+   "اسم الواجهة"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SYSTEM_INFO_NIRCADA_VERSION,
+   "إصدار NircadaOS"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_REBOOT,
+   "إعادة تشغيل"
+   )
+#endif
 
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_INPUT_SPLIT_JOYCON,
@@ -9187,6 +9205,68 @@ MSG_HASH(
    )
 MSG_HASH(
    MENU_ENUM_LABEL_VALUE_LAKKA_SERVICES,
+   "الخدمات"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SERVICES_SETTINGS,
+   "إدارة خدمات مستوى نظام التشغيل."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_SAMBA_ENABLE,
+   "سامبا"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SAMBA_ENABLE,
+   "مشاركة مجلدات الشبكة من خلال بروتوكول SMB."
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_SSH_ENABLE,
+   "استخدم SSH للوصول إلى سطر الأوامر عن بعد."
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+   "نقطة وصول Wi-Fi"
+   )
+MSG_HASH(
+   MENU_ENUM_SUBLABEL_LOCALAP_ENABLE,
+   "تمكين أو تعطيل نقطة وصول Wi-Fi."
+   )
+MSG_HASH(
+   MSG_LOCALAP_SWITCHING_OFF,
+   "إيقاف تشغيل نقطة وصول Wi-Fi."
+   )
+MSG_HASH(
+   MSG_WIFI_DISCONNECT_FROM,
+   "قطع الاتصال بشبكة Wi-Fi '%s'"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ALREADY_RUNNING,
+   "تم بالفعل بدء نقطة وصول Wi-Fi"
+   )
+MSG_HASH(
+   MSG_LOCALAP_NOT_RUNNING,
+   "لم يتم تشغيل نقطة الوصول إلى Wi-Fi"
+   )
+MSG_HASH(
+   MSG_LOCALAP_STARTING,
+   "بدء تشغيل نقطة وصول Wi-Fi باستخدام SSID =%s و Passkey=%s"
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_CREATE,
+   "تعذر إنشاء ملف تكوين نقطة وصول Wi-Fi."
+   )
+MSG_HASH(
+   MSG_LOCALAP_ERROR_CONFIG_PARSE,
+   "ملف تكوين خاطئ - تعذر العثور على APNAME أو PASSWORD في %s"
+   )
+#endif
+#ifdef HAVE_NIRCADA
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
+   "البلوتوث"
+   )
+MSG_HASH(
+   MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES,
    "الخدمات"
    )
 MSG_HASH(
