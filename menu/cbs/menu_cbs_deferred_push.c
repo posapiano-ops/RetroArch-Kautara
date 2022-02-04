@@ -113,7 +113,7 @@ GENERIC_DEFERRED_PUSH(deferred_push_configurations_list,            DISPLAYLIST_
 GENERIC_DEFERRED_PUSH(deferred_push_load_content_special,           DISPLAYLIST_LOAD_CONTENT_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_load_content_list,              DISPLAYLIST_LOAD_CONTENT_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_dump_disk_list,                 DISPLAYLIST_DUMP_DISC)
-#ifdef HAVE_LAKKA
+#if defined8HAVE_LAKKA) || defined(HAVE_NIRCADA)
 GENERIC_DEFERRED_PUSH(deferred_push_eject_disc,                     DISPLAYLIST_EJECT_DISC)
 #endif
 GENERIC_DEFERRED_PUSH(deferred_push_cdrom_info_detail_list,         DISPLAYLIST_CDROM_DETAIL_INFO)
@@ -205,7 +205,11 @@ GENERIC_DEFERRED_PUSH(deferred_push_wifi_networks_list,             DISPLAYLIST_
 GENERIC_DEFERRED_PUSH(deferred_push_network_settings_list,          DISPLAYLIST_NETWORK_SETTINGS_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_subsystem_settings_list,          DISPLAYLIST_SUBSYSTEM_SETTINGS_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_network_hosting_settings_list,          DISPLAYLIST_NETWORK_HOSTING_SETTINGS_LIST)
+#ifdef HAVE_NIRCADA
+GENERIC_DEFERRED_PUSH(deferred_push_nircada_services_list,            DISPLAYLIST_NIRCADA_SERVICES_LIST)
+#else
 GENERIC_DEFERRED_PUSH(deferred_push_lakka_services_list,            DISPLAYLIST_LAKKA_SERVICES_LIST)
+#endif
 GENERIC_DEFERRED_PUSH(deferred_push_user_settings_list,             DISPLAYLIST_USER_SETTINGS_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_directory_settings_list,        DISPLAYLIST_DIRECTORY_SETTINGS_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_privacy_settings_list,          DISPLAYLIST_PRIVACY_SETTINGS_LIST)
@@ -246,7 +250,11 @@ GENERIC_DEFERRED_PUSH(deferred_push_core_updater_list,              DISPLAYLIST_
 GENERIC_DEFERRED_PUSH(deferred_push_core_content_list,              DISPLAYLIST_CORE_CONTENT)
 GENERIC_DEFERRED_PUSH(deferred_push_core_content_dirs_list,         DISPLAYLIST_CORE_CONTENT_DIRS)
 GENERIC_DEFERRED_PUSH(deferred_push_core_content_dirs_subdir_list,  DISPLAYLIST_CORE_CONTENT_DIRS_SUBDIR)
+#ifdef HAVE_NIRCADA
+GENERIC_DEFERRED_PUSH(deferred_push_nircada_list,                     DISPLAYLIST_NIRCADA)
+#else
 GENERIC_DEFERRED_PUSH(deferred_push_lakka_list,                     DISPLAYLIST_LAKKA)
+#endif
 #endif
 
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
@@ -257,7 +265,7 @@ GENERIC_DEFERRED_PUSH(deferred_push_switch_cpu_profile,             DISPLAYLIST_
 GENERIC_DEFERRED_PUSH(deferred_push_switch_gpu_profile,             DISPLAYLIST_SWITCH_GPU_PROFILE)
 #endif
 
-#if defined(HAVE_LAKKA)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 GENERIC_DEFERRED_PUSH(deferred_push_cpu_perfpower,                  DISPLAYLIST_CPU_PERFPOWER_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_cpu_policy,                     DISPLAYLIST_CPU_POLICY_LIST)
 #endif
@@ -679,7 +687,7 @@ static int menu_cbs_init_bind_deferred_push_compare_label(
 
    const deferred_info_list_t info_list[] = {
       {MENU_ENUM_LABEL_DEFERRED_DUMP_DISC_LIST, deferred_push_dump_disk_list},
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       {MENU_ENUM_LABEL_DEFERRED_EJECT_DISC, deferred_push_eject_disc},
 #endif
       {MENU_ENUM_LABEL_DEFERRED_LOAD_DISC_LIST, deferred_push_load_disk_list},
@@ -738,7 +746,11 @@ static int menu_cbs_init_bind_deferred_push_compare_label(
       {MENU_ENUM_LABEL_DEFERRED_BLUETOOTH_SETTINGS_LIST, deferred_push_bluetooth_settings_list},
       {MENU_ENUM_LABEL_DEFERRED_WIFI_SETTINGS_LIST, deferred_push_wifi_settings_list},
       {MENU_ENUM_LABEL_DEFERRED_WIFI_NETWORKS_LIST, deferred_push_wifi_networks_list},
+#ifdef HAVE_NIRCADA
+      {MENU_ENUM_LABEL_DEFERRED_NIRCADA_SERVICES_LIST, deferred_push_nircada_services_list},
+#else
       {MENU_ENUM_LABEL_DEFERRED_LAKKA_SERVICES_LIST, deferred_push_lakka_services_list},
+#endif
       {MENU_ENUM_LABEL_DEFERRED_USER_SETTINGS_LIST, deferred_push_user_settings_list},
       {MENU_ENUM_LABEL_DEFERRED_DIRECTORY_SETTINGS_LIST, deferred_push_directory_settings_list},
       {MENU_ENUM_LABEL_DEFERRED_PRIVACY_SETTINGS_LIST, deferred_push_privacy_settings_list},
@@ -788,7 +800,7 @@ static int menu_cbs_init_bind_deferred_push_compare_label(
 #if defined(HAVE_LAKKA_SWITCH) || defined(HAVE_LIBNX)
       {MENU_ENUM_LABEL_SWITCH_CPU_PROFILE, deferred_push_switch_cpu_profile},
 #endif
-#if defined(HAVE_LAKKA)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       {MENU_ENUM_LABEL_DEFERRED_CPU_PERFPOWER_LIST, deferred_push_cpu_perfpower},
       {MENU_ENUM_LABEL_DEFERRED_CPU_POLICY_ENTRY, deferred_push_cpu_policy},
 #endif
@@ -892,8 +904,14 @@ static int menu_cbs_init_bind_deferred_push_compare_label(
       {MENU_ENUM_LABEL_DEFERRED_ARCHIVE_ACTION, deferred_archive_action},
       {MENU_ENUM_LABEL_DEFERRED_ARCHIVE_OPEN_DETECT_CORE, deferred_archive_open_detect_core},
       {MENU_ENUM_LABEL_DEFERRED_ARCHIVE_OPEN, deferred_archive_open},
+#ifdef HAVE_NIRCADA
+#ifdef HAVE_NETWORKING
+      {MENU_ENUM_LABEL_DEFERRED_NIRCADA_LIST, deferred_push_nircada_list},
+#endif
+#else
 #ifdef HAVE_NETWORKING
       {MENU_ENUM_LABEL_DEFERRED_LAKKA_LIST, deferred_push_lakka_list},
+#endif
 #endif
    };
 
@@ -996,9 +1014,16 @@ static int menu_cbs_init_bind_deferred_push_compare_label(
             BIND_ACTION_DEFERRED_PUSH(cbs, deferred_push_pl_thumbnails_updater_list);
 #endif
             break;
+#ifdef HAVE_NIRCADA
+         case MENU_ENUM_LABEL_DEFERRED_NIRCADA_LIST:
+#ifdef HAVE_NETWORKING
+            BIND_ACTION_DEFERRED_PUSH(cbs, deferred_push_nircada_list);
+#endif
+#else
          case MENU_ENUM_LABEL_DEFERRED_LAKKA_LIST:
 #ifdef HAVE_NETWORKING
             BIND_ACTION_DEFERRED_PUSH(cbs, deferred_push_lakka_list);
+#endif
 #endif
             break;
          case MENU_ENUM_LABEL_LOAD_CONTENT_HISTORY:
@@ -1282,7 +1307,7 @@ static int menu_cbs_init_bind_deferred_push_compare_label(
          case MENU_ENUM_LABEL_DEFERRED_DUMP_DISC_LIST:
             BIND_ACTION_DEFERRED_PUSH(cbs, deferred_push_dump_disk_list);
             break;
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
          case MENU_ENUM_LABEL_DEFERRED_EJECT_DISC:
             BIND_ACTION_DEFERRED_PUSH(cbs, deferred_push_eject_disc);
             break;

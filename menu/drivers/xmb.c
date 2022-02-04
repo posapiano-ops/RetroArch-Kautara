@@ -2638,7 +2638,7 @@ static uintptr_t xmb_icon_get_id(xmb_handle_t *xmb,
 
       case MENU_ENUM_LABEL_LOAD_DISC:
       case MENU_ENUM_LABEL_DUMP_DISC:
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       case MENU_ENUM_LABEL_EJECT_DISC:
 #endif
       case MENU_ENUM_LABEL_DISC_INFORMATION:
@@ -2673,8 +2673,13 @@ static uintptr_t xmb_icon_get_id(xmb_handle_t *xmb,
       case MENU_ENUM_LABEL_ONLINE_UPDATER:
       case MENU_ENUM_LABEL_UPDATER_SETTINGS:
          return xmb->textures.list[XMB_TEXTURE_UPDATER];
+#ifdef HAVE_NIRCADA
+      case MENU_ENUM_LABEL_UPDATE_NIRCADA:
+         return xmb->textures.list[XMB_TEXTURE_MAIN_MENU];
+#else
       case MENU_ENUM_LABEL_UPDATE_LAKKA:
          return xmb->textures.list[XMB_TEXTURE_MAIN_MENU];
+#endif
       case MENU_ENUM_LABEL_UPDATE_CHEATS:
          return xmb->textures.list[XMB_TEXTURE_CHEAT_OPTIONS];
       case MENU_ENUM_LABEL_THUMBNAILS_UPDATER_LIST:
@@ -5949,6 +5954,8 @@ static const char *xmb_texture_path(unsigned id)
       case XMB_TEXTURE_MAIN_MENU:
 #if defined(HAVE_LAKKA)
          return "lakka.png";
+#elif defined(HAVE_NIRCADA)
+         return "nircada.png";
 #else
          return "retroarch.png";
 #endif
@@ -6885,7 +6892,7 @@ static int xmb_list_push(void *data, void *userdata,
    bool menu_show_configurations   = settings->bools.menu_show_configurations;
    bool menu_show_load_disc        = settings->bools.menu_show_load_disc;
    bool menu_show_dump_disc        = settings->bools.menu_show_dump_disc;
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
    bool menu_show_eject_disc        = settings->bools.menu_show_eject_disc;
 #endif
    bool menu_show_shutdown         = settings->bools.menu_show_shutdown;
@@ -7029,7 +7036,7 @@ static int xmb_list_push(void *data, void *userdata,
                      false);
             }
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
             if (menu_show_eject_disc)
             {
                MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(

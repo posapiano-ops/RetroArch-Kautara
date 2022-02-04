@@ -518,7 +518,7 @@ static void menu_action_setting_disp_set_label_core_manager_entry(
 }
 
 #ifndef HAVE_LAKKA_SWITCH
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 static void menu_action_setting_disp_cpu_gov_mode(
       file_list_t* list,
       unsigned *w, unsigned type, unsigned i,
@@ -1759,7 +1759,7 @@ static int menu_cbs_init_bind_get_string_representation_compare_label(
          case MENU_ENUM_LABEL_BLUETOOTH_DRIVER:
          case MENU_ENUM_LABEL_WIFI_DRIVER:
          case MENU_ENUM_LABEL_MENU_DRIVER:
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
          case MENU_ENUM_LABEL_TIMEZONE:
 #endif
             BIND_ACTION_GET_VALUE(cbs, menu_action_setting_disp_set_label);
@@ -1907,7 +1907,7 @@ static int menu_cbs_init_bind_get_string_representation_compare_label(
                   menu_action_setting_disp_set_label_core_option_override_info);
             break;
          #ifndef HAVE_LAKKA_SWITCH
-         #ifdef HAVE_LAKKA
+         #if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
          case MENU_ENUM_LABEL_CPU_PERF_MODE:
             BIND_ACTION_GET_VALUE(cbs,
                   menu_action_setting_disp_cpu_gov_mode);

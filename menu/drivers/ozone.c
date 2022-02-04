@@ -1602,7 +1602,7 @@ static uintptr_t ozone_entries_icon_get_texture(ozone_handle_t *ozone,
    {
       case MENU_ENUM_LABEL_LOAD_DISC:
       case MENU_ENUM_LABEL_DUMP_DISC:
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       case MENU_ENUM_LABEL_EJECT_DISC:
 #endif
       case MENU_ENUM_LABEL_DISC_INFORMATION:
@@ -1706,8 +1706,13 @@ static uintptr_t ozone_entries_icon_get_texture(ozone_handle_t *ozone,
       case MENU_ENUM_LABEL_ONLINE_UPDATER:
       case MENU_ENUM_LABEL_UPDATER_SETTINGS:
             return ozone->icons_textures[OZONE_ENTRIES_ICONS_TEXTURE_UPDATER];
+#ifdef HAVE_NIRCADA
+      case MENU_ENUM_LABEL_UPDATE_NIRCADA:
+            return ozone->icons_textures[OZONE_ENTRIES_ICONS_TEXTURE_MAIN_MENU];
+#else
       case MENU_ENUM_LABEL_UPDATE_LAKKA:
             return ozone->icons_textures[OZONE_ENTRIES_ICONS_TEXTURE_MAIN_MENU];
+#endif
       case MENU_ENUM_LABEL_UPDATE_CHEATS:
             return ozone->icons_textures[OZONE_ENTRIES_ICONS_TEXTURE_CHEAT_OPTIONS];
       case MENU_ENUM_LABEL_THUMBNAILS_UPDATER_LIST:
@@ -1934,7 +1939,7 @@ static uintptr_t ozone_entries_icon_get_texture(ozone_handle_t *ozone,
    {
       case MENU_SET_CDROM_INFO:
       case MENU_SET_CDROM_LIST:
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
       case MENU_SET_EJECT_DISC:
 #endif
       case MENU_SET_LOAD_CDROM_LIST:
@@ -2173,6 +2178,8 @@ switch (id)
       case OZONE_ENTRIES_ICONS_TEXTURE_MAIN_MENU:
 #if defined(HAVE_LAKKA)
          return "lakka.png";
+#elif defined(HAVE_NIRCADA)
+         return "nircada.png";
 #else
          return "retroarch.png";
 #endif
@@ -7863,7 +7870,7 @@ static int ozone_list_push(void *data, void *userdata,
                      false);
             }
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
             if (settings->bools.menu_show_eject_disc)
             {
                MENU_DISPLAYLIST_PARSE_SETTINGS_ENUM(

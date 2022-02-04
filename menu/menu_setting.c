@@ -11665,6 +11665,69 @@ static bool setting_append_list(
             }
             else
 #endif
+
+#ifdef HAVE_NIRCADA
+            {
+               float actual_refresh_rate = video_driver_get_refresh_rate();
+
+               CONFIG_FLOAT(
+                     list, list_info,
+                     &settings->floats.video_refresh_rate,
+                     MENU_ENUM_LABEL_VIDEO_REFRESH_RATE,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_REFRESH_RATE,
+                     DEFAULT_REFRESH_RATE,
+                     "%.3f Hz",
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               menu_settings_list_current_add_range(list, list_info, 0, 0, 0.001, true, false);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               CONFIG_FLOAT(
+                     list, list_info,
+                     &settings->floats.video_refresh_rate,
+                     MENU_ENUM_LABEL_VIDEO_REFRESH_RATE_AUTO,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_REFRESH_RATE_AUTO,
+                     DEFAULT_REFRESH_RATE,
+                     "%.3f Hz",
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_start  = &setting_action_start_video_refresh_rate_auto;
+               (*list)[list_info->index - 1].action_ok     = &setting_action_ok_video_refresh_rate_auto;
+               (*list)[list_info->index - 1].action_select = &setting_action_ok_video_refresh_rate_auto;
+               (*list)[list_info->index - 1].get_string_representation =
+                  &setting_get_string_representation_st_float_video_refresh_rate_auto;
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               if (actual_refresh_rate > 0.0)
+               {
+                  CONFIG_FLOAT(
+                     list, list_info,
+                     &settings->floats.video_refresh_rate,
+                     MENU_ENUM_LABEL_VIDEO_REFRESH_RATE_POLLED,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_REFRESH_RATE_POLLED,
+                     actual_refresh_rate,
+                     "%.3f Hz",
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+                  (*list)[list_info->index - 1].action_start  = &setting_action_start_video_refresh_rate_polled;
+                  (*list)[list_info->index - 1].action_ok     = &setting_action_ok_video_refresh_rate_polled;
+                  (*list)[list_info->index - 1].action_select = &setting_action_ok_video_refresh_rate_polled;
+                  (*list)[list_info->index - 1].get_string_representation =
+                     &setting_get_string_representation_st_float_video_refresh_rate_polled;
+                  SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+               }
+            }
+#else
             {
                float actual_refresh_rate = video_driver_get_refresh_rate();
 
@@ -11725,6 +11788,7 @@ static bool setting_append_list(
                   SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
                }
             }
+#endif
 
             if (string_is_equal(settings->arrays.video_driver, "gl"))
             {
@@ -11797,6 +11861,43 @@ static bool setting_append_list(
                   CMD_EVENT_VIDEO_SET_ASPECT_RATIO);
             menu_settings_list_current_add_range(list, list_info, 0.1, 16.0, 0.01, true, false);
 
+#ifdef HAVE_NIRCADA
+            CONFIG_INT(
+                  list, list_info,
+                  &custom_vp->x,
+                  MENU_ENUM_LABEL_VIDEO_VIEWPORT_CUSTOM_X,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_VIEWPORT_CUSTOM_X,
+                  0,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            menu_settings_list_current_add_range(list, list_info, -9999, 9999, 1, true, true);
+            (*list)[list_info->index - 1].offset_by = -9999;
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT);
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info,
+                  CMD_EVENT_VIDEO_APPLY_STATE_CHANGES);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_INT(
+                  list, list_info,
+                  &custom_vp->y,
+                  MENU_ENUM_LABEL_VIDEO_VIEWPORT_CUSTOM_Y,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_VIEWPORT_CUSTOM_Y,
+                  0,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            menu_settings_list_current_add_range(list, list_info, -9999, 9999, 1, true, true);
+            (*list)[list_info->index - 1].offset_by = -9999;
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT);
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info,
+                  CMD_EVENT_VIDEO_APPLY_STATE_CHANGES);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_INT(
                   list, list_info,
                   &custom_vp->x,
@@ -11832,6 +11933,7 @@ static bool setting_append_list(
             MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info,
                   CMD_EVENT_VIDEO_APPLY_STATE_CHANGES);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
 #if defined(GEKKO) || defined(PS2) || !defined(__PSL1GHT__) && defined(__PS3__)
             if (true)
@@ -11876,6 +11978,51 @@ static bool setting_append_list(
             menu_settings_list_current_add_range(list, list_info, -50, 50, 1, true, true);
 #endif
 
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+                  list, list_info,
+                  &custom_vp->width,
+                  MENU_ENUM_LABEL_VIDEO_VIEWPORT_CUSTOM_WIDTH,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_VIEWPORT_CUSTOM_WIDTH,
+                  0,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            menu_settings_list_current_add_range(list, list_info, 1, 9999, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT);
+            (*list)[list_info->index - 1].get_string_representation =
+                  &setting_get_string_representation_uint_custom_viewport_width;
+            (*list)[list_info->index - 1].action_start = &setting_action_start_custom_viewport_width;
+            (*list)[list_info->index - 1].action_left  = &setting_uint_action_left_custom_viewport_width;
+            (*list)[list_info->index - 1].action_right = &setting_uint_action_right_custom_viewport_width;
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info,
+                  CMD_EVENT_VIDEO_APPLY_STATE_CHANGES);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_UINT(
+                  list, list_info,
+                  &custom_vp->height,
+                  MENU_ENUM_LABEL_VIDEO_VIEWPORT_CUSTOM_HEIGHT,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_VIEWPORT_CUSTOM_HEIGHT,
+                  0,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            menu_settings_list_current_add_range(list, list_info, 1, 9999, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT);
+            (*list)[list_info->index - 1].get_string_representation =
+                  &setting_get_string_representation_uint_custom_viewport_height;
+            (*list)[list_info->index - 1].action_start = &setting_action_start_custom_viewport_height;
+            (*list)[list_info->index - 1].action_left  = &setting_uint_action_left_custom_viewport_height;
+            (*list)[list_info->index - 1].action_right = &setting_uint_action_right_custom_viewport_height;
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info,
+                  CMD_EVENT_VIDEO_APPLY_STATE_CHANGES);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_UINT(
                   list, list_info,
                   &custom_vp->width,
@@ -11919,6 +12066,7 @@ static bool setting_append_list(
             MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info,
                   CMD_EVENT_VIDEO_APPLY_STATE_CHANGES);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
 #if defined(DINGUX)
             if (string_is_equal(settings->arrays.video_driver, "sdl_dingux") ||
@@ -11964,6 +12112,102 @@ static bool setting_append_list(
                   &subgroup_info,
                   parent_group);
 
+#ifdef HAVE_NIRCADA
+            if (video_driver_has_windowed())
+            {
+               CONFIG_FLOAT(
+                     list, list_info,
+                     &settings->floats.video_scale,
+                     MENU_ENUM_LABEL_VIDEO_SCALE,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_SCALE,
+                     DEFAULT_SCALE,
+                     "%.1fx",
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+               menu_settings_list_current_add_range(list, list_info, 1.0, 10.0, 1.0, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               CONFIG_UINT(
+                     list, list_info,
+                     &settings->uints.window_position_width,
+                     MENU_ENUM_LABEL_VIDEO_WINDOW_WIDTH,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_WINDOW_WIDTH,
+                     DEFAULT_WINDOW_WIDTH,
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint_special;
+               menu_settings_list_current_add_range(list, list_info, 0, 7680, 8, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               CONFIG_UINT(
+                     list, list_info,
+                     &settings->uints.window_position_height,
+                     MENU_ENUM_LABEL_VIDEO_WINDOW_HEIGHT,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_WINDOW_HEIGHT,
+                     DEFAULT_WINDOW_HEIGHT,
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint_special;
+               menu_settings_list_current_add_range(list, list_info, 0, 4320, 8, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               CONFIG_UINT(
+                     list, list_info,
+                     &settings->uints.window_auto_width_max,
+                     MENU_ENUM_LABEL_VIDEO_WINDOW_AUTO_WIDTH_MAX,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_WINDOW_AUTO_WIDTH_MAX,
+                     DEFAULT_WINDOW_AUTO_WIDTH_MAX,
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint_special;
+               menu_settings_list_current_add_range(list, list_info, 0, 7680, 8, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               CONFIG_UINT(
+                     list, list_info,
+                     &settings->uints.window_auto_height_max,
+                     MENU_ENUM_LABEL_VIDEO_WINDOW_AUTO_HEIGHT_MAX,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_WINDOW_AUTO_HEIGHT_MAX,
+                     DEFAULT_WINDOW_AUTO_HEIGHT_MAX,
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint_special;
+               menu_settings_list_current_add_range(list, list_info, 0, 4320, 8, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+               CONFIG_UINT(
+                     list, list_info,
+                     &settings->uints.video_window_opacity,
+                     MENU_ENUM_LABEL_VIDEO_WINDOW_OPACITY,
+                     MENU_ENUM_LABEL_VALUE_VIDEO_WINDOW_OPACITY,
+                     DEFAULT_WINDOW_OPACITY,
+                     &group_info,
+                     &subgroup_info,
+                     parent_group,
+                     general_write_handler,
+                     general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+               (*list)[list_info->index - 1].offset_by = 1;
+               menu_settings_list_current_add_range(list, list_info, 1, 100, 1, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+            }
+#else
             if (video_driver_has_windowed())
             {
                CONFIG_FLOAT(
@@ -12058,7 +12302,7 @@ static bool setting_append_list(
                menu_settings_list_current_add_range(list, list_info, 1, 100, 1, true, true);
                SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
             }
-
+#endif
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.video_window_show_decorations,
@@ -12505,6 +12749,25 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].action_left   = setting_bool_action_left_with_refresh;
             (*list)[list_info->index - 1].action_right  = setting_bool_action_right_with_refresh;
 
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.video_swap_interval,
+                  MENU_ENUM_LABEL_VIDEO_SWAP_INTERVAL,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_SWAP_INTERVAL,
+                  DEFAULT_SWAP_INTERVAL,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            (*list)[list_info->index - 1].offset_by = 1;
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_VIDEO_SET_BLOCKING_STATE);
+            menu_settings_list_current_add_range(list, list_info, 1, 4, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_CMD_APPLY_AUTO);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.video_swap_interval,
@@ -12522,7 +12785,7 @@ static bool setting_append_list(
             menu_settings_list_current_add_range(list, list_info, 1, 4, 1, true, true);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_CMD_APPLY_AUTO);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
-
+#endif
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.video_max_swapchain_images,
@@ -12590,6 +12853,39 @@ static bool setting_append_list(
                      );
             }
 
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.video_frame_delay,
+                  MENU_ENUM_LABEL_VIDEO_FRAME_DELAY,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_FRAME_DELAY,
+                  DEFAULT_FRAME_DELAY,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            menu_settings_list_current_add_range(list, list_info, 0, MAXIMUM_FRAME_DELAY, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.video_frame_delay_auto,
+                  MENU_ENUM_LABEL_VIDEO_FRAME_DELAY_AUTO,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_FRAME_DELAY_AUTO,
+                  DEFAULT_FRAME_DELAY_AUTO,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE
+                  );
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.video_frame_delay,
@@ -12621,7 +12917,7 @@ static bool setting_append_list(
                   SD_FLAG_NONE
                   );
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
-
+#endif
             /* Unlike all other shader-related menu entries
              * (which appear in the shaders quick menu, and
              * are thus hidden automatically on platforms
@@ -12726,6 +13022,42 @@ static bool setting_append_list(
                   );
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ADVANCED);
 
+#ifdef HAVE_NIRCADA
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.video_crop_overscan,
+                  MENU_ENUM_LABEL_VIDEO_CROP_OVERSCAN,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_CROP_OVERSCAN,
+                  DEFAULT_CROP_OVERSCAN,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE
+                  );
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_PATH(
+                  list, list_info,
+                  settings->paths.path_softfilter_plugin,
+                  sizeof(settings->paths.path_softfilter_plugin),
+                  MENU_ENUM_LABEL_VIDEO_FILTER,
+                  MENU_ENUM_LABEL_VALUE_VIDEO_FILTER,
+                  settings->paths.directory_video_filter,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].get_string_representation =
+               &setting_get_string_representation_video_filter;
+            MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "filt");
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_REINIT);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.video_crop_overscan,
@@ -12760,6 +13092,7 @@ static bool setting_append_list(
             MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "filt");
             MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_REINIT);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
             END_SUB_GROUP(list, list_info, parent_group);
             END_GROUP(list, list_info, parent_group);
@@ -13009,7 +13342,25 @@ static bool setting_append_list(
                general_read_handler,
                SD_FLAG_NONE
                );
-
+#ifdef HAVE_NIRCADA
+#ifdef HAVE_AUDIOMIXER
+         CONFIG_BOOL(
+               list, list_info,
+               audio_get_bool_ptr(AUDIO_ACTION_MIXER_MUTE_ENABLE),
+               MENU_ENUM_LABEL_AUDIO_MIXER_MUTE,
+               MENU_ENUM_LABEL_VALUE_AUDIO_MIXER_MUTE,
+               false,
+               MENU_ENUM_LABEL_VALUE_OFF,
+               MENU_ENUM_LABEL_VALUE_ON,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler,
+               SD_FLAG_NIRCADA_ADVANCED
+               );
+#endif
+#else
 #ifdef HAVE_AUDIOMIXER
          CONFIG_BOOL(
                list, list_info,
@@ -13026,6 +13377,7 @@ static bool setting_append_list(
                general_read_handler,
                SD_FLAG_LAKKA_ADVANCED
                );
+#endif
 #endif
          CONFIG_BOOL(
                list, list_info,
@@ -13057,7 +13409,70 @@ static bool setting_append_list(
                general_read_handler);
          (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
          menu_settings_list_current_add_range(list, list_info, -80, 12, 1.0, true, true);
+#ifdef HAVE_NIRCADA
+#ifdef HAVE_AUDIOMIXER
+         CONFIG_FLOAT(
+               list, list_info,
+               &settings->floats.audio_mixer_volume,
+               MENU_ENUM_LABEL_AUDIO_MIXER_VOLUME,
+               MENU_ENUM_LABEL_VALUE_AUDIO_MIXER_VOLUME,
+               DEFAULT_AUDIO_MIXER_VOLUME,
+               "%.1f",
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler);
+         (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+         menu_settings_list_current_add_range(list, list_info, -80, 12, 1.0, true, true);
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#endif
 
+         END_SUB_GROUP(list, list_info, parent_group);
+
+         parent_group = msg_hash_to_str(MENU_ENUM_LABEL_SETTINGS);
+
+         START_SUB_GROUP(
+               list,
+               list_info,
+               msg_hash_to_str(MENU_ENUM_LABEL_VALUE_AUDIO_SYNC),
+               &group_info,
+               &subgroup_info,
+               parent_group);
+
+         CONFIG_BOOL(
+               list, list_info,
+               &settings->bools.audio_sync,
+               MENU_ENUM_LABEL_AUDIO_SYNC,
+               MENU_ENUM_LABEL_VALUE_AUDIO_SYNC,
+               DEFAULT_AUDIO_SYNC,
+               MENU_ENUM_LABEL_VALUE_OFF,
+               MENU_ENUM_LABEL_VALUE_ON,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler,
+               SD_FLAG_NONE
+               );
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+         CONFIG_UINT(
+               list, list_info,
+               &settings->uints.audio_latency,
+               MENU_ENUM_LABEL_AUDIO_LATENCY,
+               MENU_ENUM_LABEL_VALUE_AUDIO_LATENCY,
+               g_defaults.settings_out_latency ?
+               g_defaults.settings_out_latency : DEFAULT_OUT_LATENCY,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler);
+         (*list)[list_info->index - 1].action_ok     = &setting_action_ok_uint;
+         menu_settings_list_current_add_range(list, list_info, 0, 512, 1.0, true, true);
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
 #ifdef HAVE_AUDIOMIXER
          CONFIG_FLOAT(
                list, list_info,
@@ -13120,7 +13535,7 @@ static bool setting_append_list(
          (*list)[list_info->index - 1].action_ok     = &setting_action_ok_uint;
          menu_settings_list_current_add_range(list, list_info, 0, 512, 1.0, true, true);
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
-
+#endif
          CONFIG_UINT(
                list, list_info,
                &settings->uints.audio_resampler_quality,
@@ -13245,6 +13660,23 @@ static bool setting_append_list(
          menu_settings_list_current_add_range(list, list_info, 1000, 192000, 100.0, true, true);
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ADVANCED);
 
+#ifdef HAVE_NIRCADA
+         CONFIG_PATH(
+               list, list_info,
+               settings->paths.path_audio_dsp_plugin,
+               sizeof(settings->paths.path_audio_dsp_plugin),
+               MENU_ENUM_LABEL_AUDIO_DSP_PLUGIN,
+               MENU_ENUM_LABEL_VALUE_AUDIO_DSP_PLUGIN,
+               settings->paths.directory_audio_filter,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler);
+         MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "dsp");
+         MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_DSP_FILTER_INIT);
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
          CONFIG_PATH(
                list, list_info,
                settings->paths.path_audio_dsp_plugin,
@@ -13260,6 +13692,7 @@ static bool setting_append_list(
          MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "dsp");
          MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_DSP_FILTER_INIT);
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
 #ifdef HAVE_WASAPI
          if (string_is_equal(settings->arrays.audio_driver, "wasapi"))
@@ -13327,7 +13760,44 @@ static bool setting_append_list(
             parent_group = msg_hash_to_str(MENU_ENUM_LABEL_SETTINGS);
 
             START_SUB_GROUP(list, list_info, "State", &group_info, &subgroup_info, parent_group);
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.input_max_users,
+                  MENU_ENUM_LABEL_INPUT_MAX_USERS,
+                  MENU_ENUM_LABEL_VALUE_INPUT_MAX_USERS,
+                  input_max_users,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok    = &setting_action_ok_uint;
+            (*list)[list_info->index - 1].action_left  = &setting_uint_action_left_with_refresh;
+            (*list)[list_info->index - 1].action_right = &setting_uint_action_right_with_refresh;
+            (*list)[list_info->index - 1].get_string_representation =
+               &setting_get_string_representation_max_users;
+            (*list)[list_info->index - 1].offset_by = 1;
+            menu_settings_list_current_add_range(list, list_info, 1, MAX_USERS, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
 
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_unified_controls,
+                  MENU_ENUM_LABEL_INPUT_UNIFIED_MENU_CONTROLS,
+                  MENU_ENUM_LABEL_VALUE_INPUT_UNIFIED_MENU_CONTROLS,
+                  false,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE
+                  );
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.input_max_users,
@@ -13364,6 +13834,7 @@ static bool setting_append_list(
                   SD_FLAG_NONE
                   );
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
             CONFIG_BOOL(
                   list, list_info,
@@ -13429,6 +13900,25 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].get_string_representation =
                &setting_get_string_representation_percentage;
             menu_settings_list_current_add_range(list, list_info, 0, 100, 5, true, true);
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.input_poll_type_behavior,
+                  MENU_ENUM_LABEL_INPUT_POLL_TYPE_BEHAVIOR,
+                  MENU_ENUM_LABEL_VALUE_INPUT_POLL_TYPE_BEHAVIOR,
+                  input_poll_type_behavior,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_UINT_COMBOBOX;
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            (*list)[list_info->index - 1].get_string_representation =
+               &setting_get_string_representation_poll_type_behavior;
+            menu_settings_list_current_add_range(list, list_info, 0, 2, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.input_poll_type_behavior,
@@ -13446,7 +13936,7 @@ static bool setting_append_list(
                &setting_get_string_representation_poll_type_behavior;
             menu_settings_list_current_add_range(list, list_info, 0, 2, 1, true, true);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
-
+#endif
 #ifdef GEKKO
             CONFIG_UINT(
                   list, list_info,
@@ -13787,6 +14277,23 @@ static bool setting_append_list(
                   &subgroup_info,
                   parent_group);
 
+#ifdef HAVE_NIRCADA
+            CONFIG_FLOAT(
+                  list, list_info,
+                  &settings->floats.input_axis_threshold,
+                  MENU_ENUM_LABEL_INPUT_BUTTON_AXIS_THRESHOLD,
+                  MENU_ENUM_LABEL_VALUE_INPUT_BUTTON_AXIS_THRESHOLD,
+                  DEFAULT_AXIS_THRESHOLD,
+                  "%.3f",
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            menu_settings_list_current_add_range(list, list_info, 0, 1.0, 0.01, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_FLOAT(
                   list, list_info,
                   &settings->floats.input_axis_threshold,
@@ -13802,6 +14309,7 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
             menu_settings_list_current_add_range(list, list_info, 0, 1.0, 0.01, true, true);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
             CONFIG_FLOAT(
                   list, list_info,
@@ -14144,6 +14652,23 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].ui_type       = ST_UI_TYPE_STRING_LINE_EDIT;
             (*list)[list_info->index - 1].action_start  = setting_generic_action_start_default;
 
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+               list, list_info,
+               &settings->uints.video_record_threads,
+               MENU_ENUM_LABEL_VIDEO_RECORD_THREADS,
+               MENU_ENUM_LABEL_VALUE_VIDEO_RECORD_THREADS,
+               DEFAULT_VIDEO_RECORD_THREADS,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler);
+               (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint_special;
+               menu_settings_list_current_add_range(list, list_info, 1, 8, 1, true, true);
+               SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+               (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_UINT_COMBOBOX;
+#else
             CONFIG_UINT(
                list, list_info,
                &settings->uints.video_record_threads,
@@ -14159,6 +14684,7 @@ static bool setting_append_list(
                menu_settings_list_current_add_range(list, list_info, 1, 8, 1, true, true);
                SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
                (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_UINT_COMBOBOX;
+#endif
 
             CONFIG_DIR(
                list, list_info,
@@ -15530,6 +16056,81 @@ static bool setting_append_list(
                   general_read_handler);
             MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "png");
 
+#ifdef HAVE_NIRCADA
+            CONFIG_FLOAT(
+                  list, list_info,
+                  &settings->floats.menu_wallpaper_opacity,
+                  MENU_ENUM_LABEL_MENU_WALLPAPER_OPACITY,
+                  MENU_ENUM_LABEL_VALUE_MENU_WALLPAPER_OPACITY,
+                  menu_wallpaper_opacity,
+                  "%.3f",
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            menu_settings_list_current_add_range(list, list_info, 0.0, 1.0, 0.010, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+         }
+
+         if (string_is_not_equal(settings->arrays.menu_driver, "rgui"))
+         {
+            CONFIG_FLOAT(
+                  list, list_info,
+                  &settings->floats.menu_framebuffer_opacity,
+                  MENU_ENUM_LABEL_MENU_FRAMEBUFFER_OPACITY,
+                  MENU_ENUM_LABEL_VALUE_MENU_FRAMEBUFFER_OPACITY,
+                  menu_framebuffer_opacity,
+                  "%.3f",
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            menu_settings_list_current_add_range(list, list_info, 0.0, 1.0, 0.010, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+         }
+
+         if (string_is_equal(settings->arrays.menu_driver, "xmb"))
+         {
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_dynamic_wallpaper_enable,
+                  MENU_ENUM_LABEL_DYNAMIC_WALLPAPER,
+                  MENU_ENUM_LABEL_VALUE_DYNAMIC_WALLPAPER,
+                  menu_dynamic_wallpaper_enable,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE
+                  );
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+         }
+
+         CONFIG_BOOL(
+               list, list_info,
+               &settings->bools.menu_pause_libretro,
+               MENU_ENUM_LABEL_PAUSE_LIBRETRO,
+               MENU_ENUM_LABEL_VALUE_PAUSE_LIBRETRO,
+               true,
+               MENU_ENUM_LABEL_VALUE_OFF,
+               MENU_ENUM_LABEL_VALUE_ON,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler,
+               SD_FLAG_CMD_APPLY_AUTO
+               );
+         MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_MENU_PAUSE_LIBRETRO);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_FLOAT(
                   list, list_info,
                   &settings->floats.menu_wallpaper_opacity,
@@ -15603,6 +16204,7 @@ static bool setting_append_list(
                );
          MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_MENU_PAUSE_LIBRETRO);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
          CONFIG_BOOL(
                list, list_info,
@@ -16283,6 +16885,39 @@ static bool setting_append_list(
          {
             /* only XMB uses these values, don't show
              * them on other drivers. */
+#ifdef HAVE_NIRCADA
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.menu_xmb_alpha_factor,
+                  MENU_ENUM_LABEL_XMB_ALPHA_FACTOR,
+                  MENU_ENUM_LABEL_VALUE_XMB_ALPHA_FACTOR,
+                  xmb_alpha_factor,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            menu_settings_list_current_add_range(list, list_info, 0, 100, 1, true, true);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_PATH(
+                  list, list_info,
+                  settings->paths.path_menu_xmb_font,
+                  sizeof(settings->paths.path_menu_xmb_font),
+                  MENU_ENUM_LABEL_XMB_FONT,
+                  MENU_ENUM_LABEL_VALUE_XMB_FONT,
+                  "",
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+            MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_REINIT);
+            MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "ttf");
+            (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_FONT_SELECTOR;
+#else
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.menu_xmb_alpha_factor,
@@ -16314,7 +16949,7 @@ static bool setting_append_list(
             MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_REINIT);
             MENU_SETTINGS_LIST_CURRENT_ADD_VALUES(list, list_info, "ttf");
             (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_FONT_SELECTOR;
-
+#endif
             CONFIG_UINT(
                   list, list_info,
                   &settings->uints.menu_font_color_red,
@@ -16533,7 +17168,7 @@ static bool setting_append_list(
                   general_read_handler,
                   SD_FLAG_NONE);
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.menu_show_eject_disc,
@@ -16548,7 +17183,7 @@ static bool setting_append_list(
                   general_write_handler,
                   general_read_handler,
                   SD_FLAG_NONE);
-#endif /* HAVE_LAKKA */
+#endif /* HAVE_LAKKA or HAVE_NIRCADA*/
 #endif
 
             CONFIG_BOOL(
@@ -16566,6 +17201,99 @@ static bool setting_append_list(
                   general_read_handler,
                   SD_FLAG_NONE);
 
+#ifdef HAVE_NIRCADA
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_show_configurations,
+                  MENU_ENUM_LABEL_MENU_SHOW_CONFIGURATIONS,
+                  MENU_ENUM_LABEL_VALUE_MENU_SHOW_CONFIGURATIONS,
+                  menu_show_configurations,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_show_overlays,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_OVERLAYS,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_OVERLAYS,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NIRCADA_ADVANCED);
+
+#ifdef HAVE_VIDEO_LAYOUT
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_show_video_layout,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_VIDEO_LAYOUT,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_VIDEO_LAYOUT,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NIRCADA_ADVANCED);
+#endif
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_show_latency,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_LATENCY,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_LATENCY,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_show_rewind,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_REWIND,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_REWIND,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_show_help,
+                  MENU_ENUM_LABEL_MENU_SHOW_HELP,
+                  MENU_ENUM_LABEL_VALUE_MENU_SHOW_HELP,
+                  menu_show_help,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NIRCADA_ADVANCED);
+#else
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.menu_show_configurations,
@@ -16657,8 +17385,8 @@ static bool setting_append_list(
                   general_write_handler,
                   general_read_handler,
                   SD_FLAG_LAKKA_ADVANCED);
-
-#ifdef HAVE_LAKKA
+#endif
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.menu_show_quit_retroarch,
@@ -16690,7 +17418,7 @@ static bool setting_append_list(
                   SD_FLAG_NONE);
 #endif
 
-#if defined(HAVE_LAKKA) || defined(HAVE_ODROIDGO2)
+#if defined(HAVE_LAKKA) || defined(HAVE_ODROIDGO2) || defined(HAVE_NIRCADA)
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.menu_show_reboot,
@@ -16740,6 +17468,44 @@ static bool setting_append_list(
 #endif
 #endif
 
+#ifdef HAVE_NIRCADA
+#if defined(HAVE_XMB) || defined(HAVE_OZONE)
+         if (string_is_equal(settings->arrays.menu_driver, "xmb") || string_is_equal(settings->arrays.menu_driver, "ozone"))
+         {
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_content_show_settings,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_SETTINGS,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_SETTINGS,
+                  content_show_settings,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+            CONFIG_STRING(
+               list, list_info,
+               settings->paths.menu_content_show_settings_password,
+               sizeof(settings->paths.menu_content_show_settings_password),
+               MENU_ENUM_LABEL_CONTENT_SHOW_SETTINGS_PASSWORD,
+               MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_SETTINGS_PASSWORD,
+               "",
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_ALLOW_INPUT | SD_FLAG_NIRCADA_ADVANCED);
+            (*list)[list_info->index - 1].ui_type       = ST_UI_TYPE_PASSWORD_LINE_EDIT;
+            (*list)[list_info->index - 1].action_start  = setting_generic_action_start_default;
+         }
+#endif
+#else
 #if defined(HAVE_XMB) || defined(HAVE_OZONE)
          if (string_is_equal(settings->arrays.menu_driver, "xmb") || string_is_equal(settings->arrays.menu_driver, "ozone"))
          {
@@ -16775,6 +17541,7 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].ui_type       = ST_UI_TYPE_PASSWORD_LINE_EDIT;
             (*list)[list_info->index - 1].action_start  = setting_generic_action_start_default;
          }
+#endif
 #endif
 
             CONFIG_BOOL(
@@ -16873,6 +17640,49 @@ static bool setting_append_list(
                   SD_FLAG_NONE);
 #endif
 
+#ifdef HAVE_NIRCADA
+#if defined(HAVE_XMB) || defined(HAVE_OZONE)
+         if (string_is_equal(settings->arrays.menu_driver, "xmb") ||
+             string_is_equal(settings->arrays.menu_driver, "ozone"))
+         {
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.menu_content_show_add,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_ADD,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_ADD,
+                  DEFAULT_MENU_CONTENT_SHOW_ADD,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+         }
+         else
+#endif
+         {
+            CONFIG_UINT(
+                  list, list_info,
+                  &settings->uints.menu_content_show_add_entry,
+                  MENU_ENUM_LABEL_CONTENT_SHOW_ADD_ENTRY,
+                  MENU_ENUM_LABEL_VALUE_CONTENT_SHOW_ADD_ENTRY,
+                  DEFAULT_MENU_CONTENT_SHOW_ADD_ENTRY,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler);
+            (*list)[list_info->index - 1].action_ok = &setting_action_ok_uint;
+            (*list)[list_info->index - 1].get_string_representation =
+               &setting_get_string_representation_uint_menu_add_content_entry_display_type;
+            menu_settings_list_current_add_range(list, list_info, 0, MENU_ADD_CONTENT_ENTRY_DISPLAY_LAST-1, 1, true, true);
+            (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_UINT_COMBOBOX;
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+         }
+#else
 #if defined(HAVE_XMB) || defined(HAVE_OZONE)
          if (string_is_equal(settings->arrays.menu_driver, "xmb") ||
              string_is_equal(settings->arrays.menu_driver, "ozone"))
@@ -16914,7 +17724,7 @@ static bool setting_append_list(
             (*list)[list_info->index - 1].ui_type   = ST_UI_TYPE_UINT_COMBOBOX;
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
          }
-
+#endif
             CONFIG_BOOL(
                   list, list_info,
                   &settings->bools.menu_content_show_playlists,
@@ -17640,7 +18450,7 @@ static bool setting_append_list(
                SD_FLAG_CMD_APPLY_AUTO);
 #endif
 
-#ifdef HAVE_LAKKA
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 #ifndef HAVE_LAKKA_SWITCH
          CONFIG_ACTION(
                list, list_info,
@@ -17863,6 +18673,42 @@ static bool setting_append_list(
 
          START_SUB_GROUP(list, list_info, "State", &group_info, &subgroup_info, parent_group);
 
+#ifdef HAVE_NIRCADA
+         CONFIG_BOOL(
+               list, list_info,
+               &settings->bools.pause_nonactive,
+               MENU_ENUM_LABEL_PAUSE_NONACTIVE,
+               MENU_ENUM_LABEL_VALUE_PAUSE_NONACTIVE,
+               DEFAULT_PAUSE_NONACTIVE,
+               MENU_ENUM_LABEL_VALUE_OFF,
+               MENU_ENUM_LABEL_VALUE_ON,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler,
+               SD_FLAG_NONE);
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+
+#if !defined(RARCH_MOBILE)
+         CONFIG_BOOL(
+               list, list_info,
+               &settings->bools.video_disable_composition,
+               MENU_ENUM_LABEL_VIDEO_DISABLE_COMPOSITION,
+               MENU_ENUM_LABEL_VALUE_VIDEO_DISABLE_COMPOSITION,
+               DEFAULT_DISABLE_COMPOSITION,
+               MENU_ENUM_LABEL_VALUE_OFF,
+               MENU_ENUM_LABEL_VALUE_ON,
+               &group_info,
+               &subgroup_info,
+               parent_group,
+               general_write_handler,
+               general_read_handler,
+               SD_FLAG_CMD_APPLY_AUTO);
+         MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_REINIT);
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#endif
+#else
          CONFIG_BOOL(
                list, list_info,
                &settings->bools.pause_nonactive,
@@ -17896,6 +18742,7 @@ static bool setting_append_list(
                SD_FLAG_CMD_APPLY_AUTO);
          MENU_SETTINGS_LIST_CURRENT_ADD_CMD(list, list_info, CMD_EVENT_REINIT);
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 #endif
 
 #if defined(_3DS)
@@ -17962,7 +18809,7 @@ static bool setting_append_list(
                general_read_handler,
                SD_FLAG_NONE);
 
-#if !defined(HAVE_LAKKA)
+#if !defined(HAVE_LAKKA) /* Enable on NIRCADA */
          CONFIG_BOOL(
                list, list_info,
                &settings->bools.menu_show_core_updater,
@@ -19882,6 +20729,105 @@ static bool setting_append_list(
          END_SUB_GROUP(list, list_info, parent_group);
          END_GROUP(list, list_info, parent_group);
          break;
+#ifdef HAVE_NIRCADA
+      case SETTINGS_LIST_NIRCADA_SERVICES:
+         {
+#if defined(HAVE_NIRCADA)
+            START_GROUP(list, list_info, &group_info,
+                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES),
+                  parent_group);
+
+            parent_group = msg_hash_to_str(MENU_ENUM_LABEL_SETTINGS);
+
+            START_SUB_GROUP(list, list_info,
+                  msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NIRCADA_SERVICES),
+                  &group_info, &subgroup_info, parent_group);
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.ssh_enable,
+                  MENU_ENUM_LABEL_SSH_ENABLE,
+                  MENU_ENUM_LABEL_VALUE_SSH_ENABLE,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE);
+            (*list)[list_info->index - 1].change_handler = ssh_enable_toggle_change_handler;
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.samba_enable,
+                  MENU_ENUM_LABEL_SAMBA_ENABLE,
+                  MENU_ENUM_LABEL_VALUE_SAMBA_ENABLE,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE);
+            (*list)[list_info->index - 1].change_handler = samba_enable_toggle_change_handler;
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.bluetooth_enable,
+                  MENU_ENUM_LABEL_BLUETOOTH_ENABLE,
+                  MENU_ENUM_LABEL_VALUE_BLUETOOTH_ENABLE,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE);
+            (*list)[list_info->index - 1].change_handler = bluetooth_enable_toggle_change_handler;
+
+            CONFIG_BOOL(
+                  list, list_info,
+                  &settings->bools.localap_enable,
+                  MENU_ENUM_LABEL_LOCALAP_ENABLE,
+                  MENU_ENUM_LABEL_VALUE_LOCALAP_ENABLE,
+                  true,
+                  MENU_ENUM_LABEL_VALUE_OFF,
+                  MENU_ENUM_LABEL_VALUE_ON,
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_write_handler,
+                  general_read_handler,
+                  SD_FLAG_NONE);
+            (*list)[list_info->index - 1].change_handler = localap_enable_toggle_change_handler;
+
+            CONFIG_STRING_OPTIONS(
+                  list, list_info,
+                  settings->arrays.timezone,
+                  sizeof(settings->arrays.timezone),
+                  MENU_ENUM_LABEL_TIMEZONE,
+                  MENU_ENUM_LABEL_VALUE_TIMEZONE,
+                  DEFAULT_TIMEZONE,
+                  config_get_all_timezones(),
+                  &group_info,
+                  &subgroup_info,
+                  parent_group,
+                  general_read_handler,
+                  general_write_handler);
+            SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_IS_DRIVER);
+            (*list)[list_info->index - 1].action_ok      = setting_action_ok_mapped_string;
+            (*list)[list_info->index - 1].change_handler = timezone_change_handler;
+
+            END_SUB_GROUP(list, list_info, parent_group);
+            END_GROUP(list, list_info, parent_group);
+#endif
+#else
       case SETTINGS_LIST_LAKKA_SERVICES:
          {
 #if defined(HAVE_LAKKA)
@@ -19979,6 +20925,7 @@ static bool setting_append_list(
             END_SUB_GROUP(list, list_info, parent_group);
             END_GROUP(list, list_info, parent_group);
 #endif
+#endif
          }
          break;
       case SETTINGS_LIST_USER:
@@ -19990,6 +20937,16 @@ static bool setting_append_list(
 
          START_SUB_GROUP(list, list_info, "State", &group_info, &subgroup_info, parent_group);
 
+#ifdef HAVE_NIRCADA
+         CONFIG_ACTION(
+               list, list_info,
+               MENU_ENUM_LABEL_ACCOUNTS_LIST,
+               MENU_ENUM_LABEL_VALUE_ACCOUNTS_LIST,
+               &group_info,
+               &subgroup_info,
+               parent_group);
+         SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#else
          CONFIG_ACTION(
                list, list_info,
                MENU_ENUM_LABEL_ACCOUNTS_LIST,
@@ -19998,6 +20955,7 @@ static bool setting_append_list(
                &subgroup_info,
                parent_group);
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 
          CONFIG_STRING(
                list, list_info,
@@ -21160,7 +22118,11 @@ static rarch_setting_t *menu_setting_new_internal(rarch_setting_info_t *list_inf
       SETTINGS_LIST_CHEEVOS,
       SETTINGS_LIST_CORE_UPDATER,
       SETTINGS_LIST_NETPLAY,
+#ifdef HAVE_NIRCADA
+      SETTINGS_LIST_NIRCADA_SERVICES,
+#else
       SETTINGS_LIST_LAKKA_SERVICES,
+#endif
       SETTINGS_LIST_USER,
       SETTINGS_LIST_USER_ACCOUNTS,
       SETTINGS_LIST_USER_ACCOUNTS_CHEEVOS,
