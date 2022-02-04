@@ -658,6 +658,10 @@ const char* xmb_theme_ident(void)
          return "automatic";
       case XMB_ICON_THEME_AUTOMATIC_INVERTED:
          return "automatic";
+#ifdef HAVE_NIRCADA
+      case XMB_ICON_THEME_TOORONTO:
+         return "tooronto";
+#endif
       case XMB_ICON_THEME_MONOCHROME:
       default:
          break;

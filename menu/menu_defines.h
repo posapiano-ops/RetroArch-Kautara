@@ -259,7 +259,12 @@ enum xmb_color_theme
 
 enum xmb_icon_theme
 {
+#ifdef HAVE_NIRCADA
+   XMB_ICON_THEME_TOORONTO = 0,
+   XMB_ICON_THEME_MONOCHROME,
+#else
    XMB_ICON_THEME_MONOCHROME = 0,
+#endif
    XMB_ICON_THEME_FLATUI,
    XMB_ICON_THEME_RETROACTIVE,
    XMB_ICON_THEME_PIXEL,

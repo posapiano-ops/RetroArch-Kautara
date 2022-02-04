@@ -739,8 +739,13 @@ static const unsigned xmb_menu_layout       = 2;
 #else
 static const unsigned xmb_menu_layout       = 0;
 #endif
+#ifdef HAVE_NIRCADA
+static const unsigned xmb_icon_theme        = XMB_ICON_THEME_TOORONTO;
+static const unsigned xmb_theme             = XMB_THEME_DARK;
+#else
 static const unsigned xmb_icon_theme        = XMB_ICON_THEME_MONOCHROME;
 static const unsigned xmb_theme             = XMB_THEME_ELECTRIC_BLUE;
+#endif 
 
 #if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA) || defined(__arm__) || defined(__PPC64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__)
 #define DEFAULT_XMB_SHADOWS_ENABLE false
@@ -765,7 +770,7 @@ static const float menu_header_opacity = 1.000;
 
 #define DEFAULT_SHOW_ADVANCED_SETTINGS false
 
-#define DEFAULT_RGUI_COLOR_THEME RGUI_THEME_CLASSIC_GREEN
+#define DEFAULT_RGUI_COLOR_THEME RGUI_THEME_CLASSIC_RED
 #define DEFAULT_RGUI_TRANSPARENCY true
 
 static const bool rgui_inline_thumbnails = false;
