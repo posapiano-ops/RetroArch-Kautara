@@ -4899,12 +4899,13 @@ static int action_ok_download_generic(const char *path,
             string_list_deinitialize(&str_list);
          }
          break;
-      case MENU_ENUM_LABEL_CB_LAKKA_DOWNLOAD:
 #ifdef HAVE_LAKKA
+      case MENU_ENUM_LABEL_CB_LAKKA_DOWNLOAD:
          /* TODO unhardcode this path*/
          fill_pathname_join(s, FILE_PATH_LAKKA_URL,
                lakka_get_project(), sizeof(s));
 #elif defined(HAVE_NIRCADA)
+      case MENU_ENUM_LABEL_CB_NIRCADA_DOWNLOAD:
          /* TODO unhardcode this path*/
          fill_pathname_join(s, FILE_PATH_NIRCADA_URL,
                nircada_get_project(), sizeof(s));

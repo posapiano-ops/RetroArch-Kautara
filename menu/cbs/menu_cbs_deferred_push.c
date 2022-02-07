@@ -113,7 +113,7 @@ GENERIC_DEFERRED_PUSH(deferred_push_configurations_list,            DISPLAYLIST_
 GENERIC_DEFERRED_PUSH(deferred_push_load_content_special,           DISPLAYLIST_LOAD_CONTENT_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_load_content_list,              DISPLAYLIST_LOAD_CONTENT_LIST)
 GENERIC_DEFERRED_PUSH(deferred_push_dump_disk_list,                 DISPLAYLIST_DUMP_DISC)
-#if defined8HAVE_LAKKA) || defined(HAVE_NIRCADA)
+#if defined(HAVE_LAKKA) || defined(HAVE_NIRCADA)
 GENERIC_DEFERRED_PUSH(deferred_push_eject_disc,                     DISPLAYLIST_EJECT_DISC)
 #endif
 GENERIC_DEFERRED_PUSH(deferred_push_cdrom_info_detail_list,         DISPLAYLIST_CDROM_DETAIL_INFO)

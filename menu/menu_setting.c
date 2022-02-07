@@ -9506,6 +9506,7 @@ static bool setting_append_list(
                &subgroup_info,
                parent_group);
          SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_NIRCADA_ADVANCED);
+#endif
 #else
 #ifdef HAVE_AUDIOMIXER
          CONFIG_ACTION(
@@ -11404,6 +11405,7 @@ static bool setting_append_list(
                   general_read_handler,
                   SD_FLAG_NONE);
             SETTINGS_DATA_LIST_CURRENT_ADD_FLAGS(list, list_info, SD_FLAG_LAKKA_ADVANCED);
+#endif
 #endif
 
             END_SUB_GROUP(list, list_info, parent_group);
