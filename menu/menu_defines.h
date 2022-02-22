@@ -260,7 +260,8 @@ enum xmb_color_theme
 enum xmb_icon_theme
 {
 #ifdef HAVE_NIRCADA
-   XMB_ICON_THEME_TOORONTO = 0,
+   XMB_ICON_THEME_MINNILLO = 0,
+   XMB_ICON_THEME_TOORONTO,
    XMB_ICON_THEME_MONOCHROME,
 #else
    XMB_ICON_THEME_MONOCHROME = 0,

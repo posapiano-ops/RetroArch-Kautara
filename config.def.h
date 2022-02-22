@@ -740,7 +740,7 @@ static const unsigned xmb_menu_layout       = 2;
 static const unsigned xmb_menu_layout       = 0;
 #endif
 #ifdef HAVE_NIRCADA
-static const unsigned xmb_icon_theme        = XMB_ICON_THEME_TOORONTO;
+static const unsigned xmb_icon_theme        = XMB_ICON_THEME_MINNILLO;
 static const unsigned xmb_theme             = XMB_THEME_DARK;
 #else
 static const unsigned xmb_icon_theme        = XMB_ICON_THEME_MONOCHROME;
