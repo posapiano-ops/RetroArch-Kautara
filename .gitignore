@@ -234,3 +234,4 @@ param.sfo
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history.vscode/settings.json
+retroarch-100-nircada01.patch
